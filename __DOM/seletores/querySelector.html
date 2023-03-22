@@ -1,0 +1,44 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pegar tag por qualquer meio</title>
+</head>
+<body>
+  <div id="html-div">Tag id</div>
+  <div class="html-div">Tag classe</div>
+  <div data-element="html-div">Tag atributo customizado</div>
+  <ol>
+    <li>Tag li</li>
+  </ol>
+  <p></p>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Coleta alguma tag que tenha algum seletor com valor instanciado
+    // SINTAXE: document.querySelector('seletor')
+    // Usar somente quando for coletar UM DADO (recurso não serve como array)
+    
+    // Selecionando por seletores variados: [#, ., [], tag]
+    let tagDivWithId = document.querySelector('#html-div')
+    let tagDivWithClass = document.querySelector('.html-div')
+    let tagDivWithCustomAtrib = document.querySelector('[data-element]')
+    let tagDivWithOrderedList = document.querySelector('ol li')
+    
+    let report = document.querySelector('p')
+    report.textContent = `
+    tagDivWithId = ${tagDivWithId}
+    tagDivWithClass = ${tagDivWithClass}
+    tagDivWithCustomAtrib = ${tagDivWithCustomAtrib}
+    tagDivWithOrderedList = ${tagDivWithOrderedList}
+    `
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+</head>
+<body>
+  <script>
+    // Criar uma tag sem anexá-la ao corpo do HTML
+    // Após a criação, se adiciona outros meios (classe, id, atrib. customizado)
+
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+    
+    // AQUI
+    let element = document.createElement('div')
+    let elementChild = document.createElement('div')
+    
+    // "element" inserida na tag body
+    element.className = 'classe'
+    element.textContent = 'Tag mãe'
+    document.body.appendChild(element)
+    
+    // "element" recebendo "elementChild"
+    element.appendChild(elementChild)
+    elementChild.textContent = 'Tag filha'
+
+    element.style.border = 'aqua solid 2px'
+    element.style.padding = '1rem'
+    elementChild.style.border = 'yellow solid 2px'
+    elementChild.style.padding = '1rem'
+  </script>
+</body>
+<!--
+========== RESULTADO ==========
+<body>
+  <div class="classe">
+    <div>Filha</div>
+  </div>
+</body>
+-->
+</html>

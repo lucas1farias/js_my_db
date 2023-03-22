@@ -1,0 +1,39 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>addEventListener('click')</title>
+  <style>
+    body {
+      background-color: #222;
+      color: #0f0;
+      font-family: consolas;
+    }
+    button {
+      background: linear-gradient(to top left, blue, black);
+      color: #fff;
+      border-radius: 1rem;
+      padding: 1rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button class="btn">Clique para eu me mover</button>
+  <script>
+    let btn = document.querySelector('.btn')
+    btn.addEventListener('click', () => {
+      let where = ['X', 'Y']
+      let howMuch = [...Array(501).keys()]
+      let i = Math.floor(Math.random() * where.length - 0)
+      let i2 = Math.floor(Math.random() * howMuch.length - 0)
+      btn.style.transform = `translate${where[i]}(${howMuch[i2]}px)`
+      btn.style.transition = 'linear .5s'
+    })
+  </script>
+</body>
+</html>

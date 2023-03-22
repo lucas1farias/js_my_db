@@ -1,0 +1,36 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificar dados de forma geral</title>
+</head>
+<body>
+  <div class="html-div"></div>
+  <div>Vazio</div>
+  <p></p>
+  <p></p>
+
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // NO DOM, verifica se algum dado está num elemento de tag
+    // Abaixo, temos um exemplo verificando: nome de classe, texto
+
+    let divTag = document.querySelector('.html-div')
+    let divTag2 = document.querySelector('div:nth-of-type(2)')
+    let report = document.querySelector('p:nth-of-type(1)')
+    let report2 = document.querySelector('p:nth-of-type(2)')
+    
+    report.textContent = `Primeira div têm a classe "html-div"? ${divTag.className.includes('html-div') === true ? 'sim' : 'não'}`
+    report2.textContent = `A letra "V" está no texto da segunda div? ${divTag2.textContent.includes('V')}`
+    // console.log(report.textContent, report.textContent.includes('true'))
+  </script>
+</body>
+</html>

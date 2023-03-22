@@ -1,0 +1,13 @@
+
+
+===== Editados =====
+C:\Users\lucasf\_vscode_projects\_canvas_lobo
+C:\Users\lucasf\_vscode_projects\relogio
+C:\Users\lucasf\_vscode_projects\eleicoes_2022
+C:\Users\lucasf\_vscode_projects\_jogo_memoria_v2
+C:\Users\lucasf\_vscode_projects\_pagina_responsiva_cores
+C:\Users\lucasf\_vscode_projects\ingles_jogo_pronomes        (Pronomes se movendo pelo canvas, eles devem tentar ser clicados)
+C:\Users\lucasf\_vscode_projects\_bootstrap_grid_vs_css_grid
+C:\Users\lucasf\_vscode_projects\_counter                    (Versão manual e rústica do projeto do relógio)
+C:\Users\lucasf\_vscode_projects\estatistica_graficos        (Página responsiva com muitas informações sobre grid e flex)
+C:\Users\lucasf\_vscode_projects\_canvas_forma_circulo       (Treino de como usar a forma círculo do html5 canvas)

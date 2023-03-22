@@ -1,0 +1,73 @@
+
+
+===== Extensões =====
+* Material Icon Theme
+* Pylance
+* Code Runner
+* Indent Rainbow
+* Intellij IDEA Keybindings
+* Live Server
+* Python
+* Ubuntu Style Theme
+* Github Theme
+* Prettier - Code Formatter
+
+===== Acessar menu =====
+* ctrl + shift + A
+* Selecionar "Preferences: Open User Settings (JSON)" (pode ser configurado um atalho)
+* Atalho que eu escolhi: [shift + espaço]
+
+{
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#222",
+    "tab.activeBackground": "#222",
+    "tab.activeBorder": "#00ff00",
+    "activityBar.foreground": "#fff"
+  },
+  "terminal.integrated.fontSize": 13,
+  "workbench.iconTheme": "material-icon-theme",
+  // no vídeo você viu uma config de fonte aqui,
+  // mas ela não é compatível com todos os sistemas, por isso, tirei ok?
+  "editor.minimap.enabled": false,
+  "editor.wordWrap": "off",
+  "editor.fontFamily": "Consolas",
+  "editor.fontSize": 12,
+  "workbench.editor.tabSizing": "shrink",
+  "workbench.editor.enablePreview": false,
+  "explorer.compactFolders": false,
+  // formatter
+  "prettier.tabWidth": 2,
+  "prettier.semi": false,
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "none",
+  "prettier.arrowParens": "avoid",
+  "prettier.endOfLine": "auto",
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "liveServer.settings.donotShowInfoMsg": true,
+  "liveServer.settings.donotVerifyTags": true,
+  "bracket-pair-colorizer-2.depreciation-notice": false,
+  "code-runner.saveFileBeforeRun": true,
+  "code-runner.clearPreviousOutput": true,
+  "explorer.confirmDelete": false,
+  "files.autoSave": "afterDelay",
+  "window.zoomLevel": 1,
+  // Using the light mode
+  "indentRainbow.indicatorStyle": "light",
+  // we use a simple 1 pixel wide line
+  "indentRainbow.lightIndicatorStyleLineWidth": 1,
+  // the same colors as above but more visible
+  "indentRainbow.colors": [
+    "rgba(255,255,64,0.3)",
+    "rgba(127,255,127,0.3)",
+    "rgba(255,127,255,0.3)",
+    "rgba(79,236,236,0.3)"
+  ],
+  "indentRainbow.excludedLanguages": ["plaintext"]
+}

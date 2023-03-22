@@ -1,0 +1,37 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Definir atributos</title>
+</head>
+<body>
+  <a></a>
+  <span></span>
+  <p></p>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+    
+    // Define atributos comuns a certas tags
+
+    let linkTag = document.querySelector('a')
+    let spanTag = document.querySelector('span')
+    let pTag = document.querySelector('p')
+
+    // AQUI
+    // Dando um valor p/ o atributo da tag <a></a>
+    linkTag.setAttribute('href', 'https://www.google.com')
+    spanTag.setAttribute('class', 'mock')
+    pTag.setAttribute('data-language', 'javascript')
+    
+    // Adquirindo o valor recem dado e o passando como texto de link
+    linkTag.textContent = linkTag.getAttribute('href')
+  </script>
+</body>
+</html>

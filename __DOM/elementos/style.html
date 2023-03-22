@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usar CSS dentro do JS</title>
+</head>
+<body>
+  <main>
+    
+  </main>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Apenas a tag body aceita a sintaxe "document."
+    // Para as outras tags, é preciso criar um elemento
+    // Após criar o elemento, este é mesclado à sintaxe ".style"
+    // A propriedade chamada, se nome composto, usa "CamelCase"
+    // "CamelCase" substitui a sintaxe "-" do CSS
+
+    let circle = document.createElement('div')
+    let color = document.createElement('div')
+    document.body.appendChild(circle)
+    document.body.appendChild(color)
+
+    circle.style.backgroundColor = 'black'
+    circle.style.height = '70px'
+    circle.style.width = '70px'
+    circle.style.borderRadius = '50%'
+    circle.style.boxShadow = '0 0 20px black'
+    document.body.style.display = 'flex'
+    document.body.style.alignItems = 'center'
+    document.body.style.justifyContent = 'center'
+    document.body.style.flexDirection = 'column'
+    document.body.style.gap = '1rem 0'
+    document.body.style.minHeight = '100vh'
+
+    setInterval(() => {
+      let inks = ['#0f0', 'green', 'yellow', 'blue', 'white']
+      let index = Math.floor(Math.random() * inks.length - 0)
+      circle.style.boxShadow = `0 0 20px ${inks[index]}`
+      color.textContent = inks[index]
+    }, 250)
+
+  </script>
+</body>
+</html>

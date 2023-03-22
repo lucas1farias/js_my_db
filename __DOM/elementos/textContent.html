@@ -1,0 +1,27 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>elemento.textContent</title>
+</head>
+<body>
+  <div></div>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Definir um texto para uma tag
+
+    let divTag = document.querySelector('div')
+    
+    // AQUI
+    divTag.textContent = divTag
+  </script>
+</body>
+</html>

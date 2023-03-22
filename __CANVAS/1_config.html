@@ -1,0 +1,46 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuração inicial</title>
+</head>
+<body>
+  <!-- a_a: Criar uma tag canvas, que é onde o conteúdo inteiro será renderizado -->
+  <canvas></canvas>
+  <script>
+
+    document.body.style.backgroundColor = 'black'
+    document.body.style.display = 'flex'
+    document.body.style.display = 'flex'
+    document.body.style.alignItems = 'center'
+    document.body.style.justifyContent = 'center'
+    document.body.style.minHeight = '100vh'
+
+    // a_b: Capturar o elemento e dele, criar uma var. de contexto
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas.getContext('2d')
+
+    // a_c: Configurar dimensões p/ o canvas
+    canvas.width = 1200
+    canvas.height = 600
+
+
+    // a_d: Configurar o loop principal, que recebe toda a mecânica do jogo
+    function animate() {
+      // a_d: Configuração inicial (descartável) p/ preencher o canvas (substituída por imagens de fundo)
+      ctx.fillStyle = '#222'
+      ctx.fillRect(0, 0, innerWidth, innerHeight)
+      // Teste se o loop está tendo o comportamento esperado
+      console.log('Loop')
+      requestAnimationFrame(animate)
+    }
+
+    animate()
+  
+  </script>
+</body>
+</html>

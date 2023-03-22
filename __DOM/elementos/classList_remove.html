@@ -1,0 +1,51 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adicionar classe css em uma tag</title>
+  <style>
+    .shade {
+      text-shadow: 0 0 20px #0f0;
+    }
+
+    div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-size: 5rem;
+    }
+  </style>
+</head>
+<body>
+  <div>Javascript</div>
+
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Remove uma classe css p/ uma tag
+    // A classe não precisa de um seletor
+
+    let divTag = document.querySelector('div')
+
+    // AQUI
+    setInterval(() => {
+      divTag.classList.add('shade')
+      
+      setTimeout(() => {
+        // AQUI
+        divTag.classList.remove('shade')
+      }, 500)
+      
+    }, 1000)
+    
+  </script>
+</body>
+</html>

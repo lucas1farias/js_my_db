@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instanciar elemento com atributo customizado</title>
+</head>
+<body>
+  <div data-sentence="html-div">tag div</div>
+  <span data-sentence="html-span">tag span</span>
+  <ol>
+    <li data-sentence="html-li">tag li</li>
+  </ol>
+  <p data-paragraph="html p">Tag p</p>
+  <i data-italic="html i">Tag i</i>
+
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+    
+    // Como criar/instanciar um elemento que tenha um atributo customizado
+    // O atributo chamado sempre fica envolto de parênteses, como se fosse um índice
+    // Se os nomes são iguais, é preciso especificações de tags para não haver conflito
+
+    // AQUI (com nomes de atributos ==)
+    let divTag = document.querySelector('div[data-sentence]')
+    let spanTag = document.querySelector('span[data-sentence]')
+    let liTag = document.querySelector('li[data-sentence]')
+    divTag.textContent = divTag
+    spanTag.textContent = spanTag
+    liTag.textContent = liTag
+    
+    // AQUI (com nomes de atributos !=)
+    let pTag = document.querySelector('[data-paragraph]')
+    let iTag = document.querySelector('[data-italic]')
+    pTag.textContent = pTag
+    iTag.textContent = iTag
+  </script>
+</body>
+</html>

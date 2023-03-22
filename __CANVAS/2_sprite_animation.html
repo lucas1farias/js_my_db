@@ -1,0 +1,295 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuração inicial</title>
+</head>
+<body>
+  <canvas></canvas>
+  <script>
+
+    document.body.style.backgroundColor = 'black'
+    document.body.style.display = 'flex'
+    document.body.style.display = 'flex'
+    document.body.style.alignItems = 'center'
+    document.body.style.justifyContent = 'center'
+    document.body.style.minHeight = '100vh'
+
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas.getContext('2d')
+
+    canvas.width = 1200
+    canvas.height = 600
+
+    /*
+      ========== DETALHES INICIAIS ==========
+      * Recortar a imagem do seu "spritesheet" que represente a parte da ação desejada animar
+      * Supondo que se tenha um "spritesheet" com várias ações. Uma delas é recortada
+      * O recorte passa por duas etapas de edição
+      * A etapa 1 é recortar cada imagem da sequência, p/ que elas fiquem bem próximas umas das outras 
+        (MOTIVO: tornar precisa colisões laterais e excluir excedentes de espaços laterias)
+      * A etapa 2 é recortar o máximo do topo e do fundo da imagem 
+        (MOTIVOS: tornar precisas colisões verticais)
+
+      ========== Como fazer a etapa 1? ========== 
+      * Pegar o lado -> de cada imagem, e pelo paint, ver a posição "x" no canto esquerdo da tela (x, y)
+      * Achando o "x", subir o mouse ao topo da tela nesta posição "x" (achar o y=1, pois y=0 é muito difícil)
+      * Descer o mouse, mantendo-o pressionado até o fundo da imagem
+      * Com as setas do teclado, direcionar a imagem selecionada até o mais próximo da <- possível
+      * Fazer o mesmo procedimento com todas as imagens do "spritesheet" até todas estarem alinhadas e minimamente próximas
+      
+      ========== Como fazer a etapa 2? ==========
+      * Ter concluido a etapa 1
+      * Se haver uma distância entre o fundo da imagem e o fundo do plano de fundo onde ela está:
+          -> Puxar com o mouse até não haver mais
+      * Se haver uma distância entre o topo da imagem e o fundo do plano de fundo onde ela está:
+          -> Passar o mouse no topo da imagem para ver sua posição "y"
+          -> Ir ao canto extremo esquerdo do "Spritesheet" a partir da referÊncia da posição "y", puxar p/ -> até o final 
+          -> Recortar e colar novamente o "SpriteSheet" (os espaços anteriores devem ter sido apagados)
+      
+      ========== DETALHES FINAIS ==========
+      * As etapas 1 e 2 são essenciais, mas se ao final, os "Spritessheets" não tiverem as mesmas dimensões, leia abaixo
+      * O paint possui uma ferramenta "Redimensionar" e as opções "Pixels" e "Manter taxa de proporção"
+      * Essa ferramente se torna IMPORTANTE pelo contexto descrito abaixo
+    */
+
+    // ========== OBS: "ADD APÓS TUTORIAL" ensina como add novas animações pós configuração inicial ==========
+
+    function createPlayer() {
+      player = new Player()
+    }
+
+    function init() {
+      createPlayer()
+    }
+
+    function animate() {
+      ctx.fillStyle = '#222'
+      ctx.fillRect(0, 0, innerWidth, innerHeight)
+      
+      player.draw()
+      player.frameAdmin()
+      
+      /*
+      ========== COMO ENCONTRAR OS RESULTADOS USADOS NO PARÃMETRO 4 DA FUNÇÃO "drawImage" ==========
+      -> Criar uma imagem piloto que não será de fato usada (apenas a referência p/ o teste)
+      -> Apontar seu local no projeto
+      -> Criar dois arrays, que terão seus valores descobertos 
+      -> O array 1 é mais fácil de achar (pelo paint com o mouse, achar a posição "x" da parte mais longe da imagem à ->)
+      -> O array 2 requer tentativa e erro, passando valores e F5 no HTML p/ ver se cada sprite foi cortado corretamente
+      -> Após encontrar as coordenadas exatas nos 2 arrays, incrementar os [i] na função "drawImage" p/ achar os próximos
+      -> Ambos procedimentos são feito até antes da última imagem (não inclusiva)
+      -> Após descobrir todos os valores, passar os arrays p/ dentro da classe "Player" em "this.wolfSetup"
+
+      ========== CÓDIGO P/ DESCOBRIR AS ARRAYS: usar na função "animate()" ==========
+      let testSprite = new Image()
+      testSprite.src = 'wolf_idle_right.gif'
+      let width = [0, 178, 353, 526, 693, 864, 1039]
+      let widthDistance = [178, 176, 173, 167, 170, 172, 176]
+      ctx.drawImage(testSprite, width[0], 0, widthDistance[0], 175, 400, 100, 200, 200)
+      */
+      
+      requestAnimationFrame(animate)
+    }
+
+    class Player {
+      constructor() {
+        /*
+          a_a: Objeto fundamental que recebe objetos aninhados que guardam os parâmetros editáveis da função "drawImage"
+          a_a: Cada objeto aninhado representa um "estado" de animação do jogador
+          a_a: Os valores destes objetos aninhados são chamados na função "loadSprite", engatilhados por eventos de escuta
+          a_a: Por exemplo, se não for pressionado "d", a função "loadSprite" é ativada e chama um estado "idle_right"
+          a_a: Com isso, a variável de classe "this.wolfSetup" chama o objeto aninhado correspondente "idleRight"
+          a_a: Os valores desses objeto aninhado são passados à função "loadSprite"
+          a_a: Ao mesmo tempo, de forma independente, no loop "animate", o objeto é desenhado pelas func. "draw" e "frameAdmin"
+          a_a: Essas funções fazem uso indireto de "loadSprite", o que resulta na animação do personagem
+        */
+        this.wolfSetup = {
+          /*
+          widthList  || Lista de posições "x" do COMEÇO de cada imagem do "Spritesheet" após sua edição
+          widthList  || O primeiro índice sempre será 0 neste contexto
+          widthList2 || Lista das larguras de cada imagem do "Spritesheet" 
+          widthList2 || Para entender melhor, procure por "CÓDIGO P/ DESCOBRIR AS ARRAYS" neste arquivo
+          srcHeight  || Altura das imagens no "Spritesheet" 
+          frameCount || Como se sabe este valor? qtd. de imagens no "Spritesheet" - 1
+          */
+          idleRight: {
+            widthList: [0, 178, 353, 526, 693, 864, 1039], 
+            widthList2: [178, 176, 173, 167, 170, 172, 176],
+            srcHeight: 167,
+            frameAmount: 6
+          },
+          
+          // ADD APÓS TUTORIAL
+          idleLeft: {
+            widthList: [0, 178, 353, 526, 693, 864, 1039], 
+            widthList2: [178, 176, 173, 167, 170, 172, 176],
+            srcHeight: 167,
+            frameAmount: 6
+          },
+        }
+        
+        // Imagem inicial do jogador antes de qualquer animação ser feita
+        this.reference = new Image()
+        this.reference.src = 'pilot_image.png'
+        
+        // Variáveis não mandatórias, mas úteis p/ simular como se o jogador estivesse numa superfície
+        this.surfaceHeight = 61
+        this.playerHeight = 60 
+        
+        /*
+          a_b: Todos os atributos possíveis p/ poder desenhar o jogador na função "draw"
+          a_b: A instaciação das variáveis de classe segue a ordem exata dos parâmetros da função "draw"
+        */
+        this.image = this.reference                                                      
+        this.widthList = this.wolfSetup.idleRight.widthList                      
+        this.frameCounter = 0                                                  
+        this.fixedHeight = 0                                                   
+        this.widthList2 = this.wolfSetup.idleRight.widthList2                  
+        this.srcHeight = this.wolfSetup.idleRight.srcHeight                    
+        this.whereX = 100                                                      
+        this.whereY = canvas.height - (this.playerHeight + this.surfaceHeight) 
+        this.canvasWidth = 60                                                  
+        this.canvasHeight = 60                                                 
+        
+        /*
+          a_c: Atributos usados na função "frameAdmin", que auxiliam na transição de sprites
+          a_c: this.modularCounter || Seu valor transita entre o range(1, 1001) na função "frameAdmin"
+          a_c: this.modularCounter || A cada vez que esse valor for divisível por "this.modular", os sprites mudam
+          a_c: this.modular        || Quanto maior seu valor + lenta a transição de sprites
+          a_c: this.frameAmount    || Deve ter um valor inicial, mas muda constantemente por causa da função "loadSprite" 
+        */
+        this.modularCounter = 0                                                
+        this.modular = 5                                                        
+        this.frameAmount = this.wolfSetup.idleRight.frameAmount
+        
+        // Chaves que determinam qual "estado" de animação devem ser ativados nos eventos de escuta
+        this.keys = {
+          d: { pressed: false },
+          // ADD APÓS TUTORIAL
+          a: { pressed: false }
+        }
+      }
+
+      // a_d: Desenho da imagem do jogador no canvas
+      draw() {
+        ctx.drawImage(
+          this.image,
+          this.widthList[this.frameCounter],
+          this.fixedHeight,
+          this.widthList2[this.frameCounter],
+          this.srcHeight,
+          this.whereX,
+          this.whereY,
+          this.canvasWidth,
+          this.canvasHeight
+        )
+      }
+
+      timeToLoadNextImage() {
+        return this.modularCounter % this.modular === 0
+      }
+
+      isInsideThreshold() {
+        return this.frameCounter < this.frameAmount
+      }
+
+      keepChangingSprites() {
+        this.frameCounter++
+      }
+
+      resetSpritesCountage() {
+        this.frameCounter = 0
+      }
+
+      frameCounterReachesThreshold() {
+        return this.modularCounter == 1000
+      }
+
+      resetFrameCounter() {
+        this.modularCounter = 0
+      }
+
+      // a_e: Controle de velocidade da transição e transição de sprites do jogador
+      frameAdmin() {
+        this.modularCounter++
+
+        if (this.timeToLoadNextImage()) {
+          if (this.isInsideThreshold()) {
+            this.keepChangingSprites()
+          } else {
+            this.resetSpritesCountage()
+          }
+        }
+        
+        // Não mandatório, apenas p/ não deixar "this.modularCounter" ++ eternamente
+        if (this.frameCounterReachesThreshold()) {
+          this.resetFrameCounter()
+        }
+      }
+
+      loadSprite(action) {
+        if (action === 'idle_right') {
+          this.reference = new Image()
+          this.reference.src = 'wolf_idle_right.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.idleRight.widthList
+          this.widthList2 = this.wolfSetup.idleRight.widthList2
+          this.srcHeight = this.wolfSetup.idleRight.srcHeight
+          this.frameAmount = this.wolfSetup.idleRight.frameAmount
+        } 
+        // ADD APÓS TUTORIAL
+        else if (action === 'idle_left') {
+          this.reference = new Image()
+          this.reference.src = 'wolf_idle_left.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.idleLeft.widthList
+          this.widthList2 = this.wolfSetup.idleLeft.widthList2
+          this.srcHeight = this.wolfSetup.idleLeft.srcHeight
+          this.frameAmount = this.wolfSetup.idleLeft.frameAmount
+        } 
+      }
+
+      manner(state) {
+        if (state == 'idle_facing_right') {
+          this.keys.d.pressed = false
+          return this.keys.d.pressed
+        }
+        // ADD APÓS TUTORIAL
+        else if (state == 'idle_facing_left') {
+          this.keys.a.pressed = false
+          return this.keys.a.pressed
+        }
+      }
+    }
+
+    // b_f: ANTES: [let new Player()] Criação do objeto do jogador / q_a: Após criar o fosso de queda, o valor muda 
+    let player = undefined
+    
+    init()
+    animate()
+    
+    // JOYSTICK 
+    addEventListener('keyup', ({ key }) => {
+    switch (key) {
+      case 'd':
+        player.manner('idle_facing_right')
+        player.loadSprite('idle_right')
+        break
+      // ADD APÓS TUTORIAL
+      case 'a':
+        player.manner('idle_facing_left')
+        player.loadSprite('idle_left')
+        break
+      }
+    })
+  
+  </script>
+</body>
+</html>

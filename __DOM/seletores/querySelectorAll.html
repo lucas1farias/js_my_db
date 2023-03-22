@@ -1,0 +1,61 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pegar todos os elementos usando algum seletor</title>
+</head>
+<body>
+  <p>Tag p 1</p>
+  <p>Tag p 2</p>
+
+  <div class="html-div">Tag div 1</div>
+  <div class="html-div">Tag div 2</div>
+
+  <div data-atrib="html-atrib">Atributo customizado 1</div>
+  <div data-atrib="html-atrib">Atributo customizado 2</div>
+  <div data-atrib="html-atrib">Atributo customizado 3</div>
+
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Coleta todas as tags iguais, de classe, igual, de atributo de classe igual, etc...
+    // SINTAXE: document.querySelectorAll('tag', 'seletor + valor')
+    // Gera um "NODE LIST", que não é um array
+    // Usar somente quando for coletar MÚLTIPLOS DADOS (recurso serve como array, se convertido)
+    
+    // TODAS AS TAGS
+    let tagsP = document.querySelectorAll('p')
+    console.log('ANTES DA CONVERSÃO P/ ARRAY', 'tagsP =', tagsP)
+
+    // TODAS AS CLASSES
+    let tagsDiv = document.querySelectorAll('.html-div')
+    console.log('ANTES DA CONVERSÃO P/ ARRAY', 'tagsDiv =', tagsDiv)
+
+    // TODAS OS ATRIBUTOS CUSTOMIZADOS (pelo nome, não pelo valor)
+    let tagsCustomAtrib = document.querySelectorAll('[data-atrib]')
+    console.log('ANTES DA CONVERSÃO P/ ARRAY', 'tagsCustomAtrib =', tagsCustomAtrib)
+
+    console.log('\n')
+
+    tagsP = Array.from(tagsP)
+    tagsDiv = Array.from(tagsDiv)
+    tagsCustomAtrib = Array.from(tagsCustomAtrib)
+
+    console.log('DEPOIS DA CONVERSÃO P/ ARRAY', 'tagsP =', tagsP)
+    console.log('DEPOIS DA CONVERSÃO P/ ARRAY', 'tagsDiv =', tagsDiv)
+    console.log('DEPOIS DA CONVERSÃO P/ ARRAY', 'tagsCustomAtrib =', tagsCustomAtrib)
+    console.log('\n')
+
+    console.log('tagsP[0] =', tagsP[0])
+    console.log('tagsDiv[1] =', tagsDiv[1])
+    console.log('tagsCustomAtrib[0] =', tagsCustomAtrib[2])
+  </script>
+</body>
+</html>

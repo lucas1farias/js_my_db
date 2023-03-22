@@ -1,0 +1,58 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+</head>
+<body>
+  <main>Principal</main>
+  <div class="box">
+    <div>Div 1</div>
+    <div>Div 2</div>
+    <div>Div 3</div>
+  </div>
+  <footer>Rodapé</footer>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Elementos
+    let motherTag = document.querySelector('.box')
+    console.log('motherTag =', motherTag)
+
+    // Níveis de parentesco
+    console.log('motherTag.firstElementChild =', motherTag.firstElementChild)
+    console.log('motherTag.lastElementChild =', motherTag.lastElementChild)
+    
+    console.log('motherTag.nextSibling() =', motherTag.nextSibling)
+    console.log('motherTag.nextElementSibling =', motherTag.nextElementSibling)
+
+    console.log('motherTag.previousSibling =', motherTag.previousSibling)
+    console.log('motherTag.previousElementSibling =', motherTag.previousElementSibling)
+
+    console.log('[...motherTag.children] =', [...motherTag.children])
+    console.log('[...motherTag.children][0] =', [...motherTag.children][0])
+    console.log('[...motherTag.children][1] =', [...motherTag.children][1])
+    console.log('[...motherTag.children][2] =', [...motherTag.children][2])
+
+    console.log('[...motherTag.childNodes] =', [...motherTag.childNodes])
+    console.log('[...motherTag.childNodes][0] =', [...motherTag.childNodes][0])
+    console.log('[...motherTag.childNodes][1] =', [...motherTag.childNodes][1])
+    console.log('[...motherTag.childNodes][2] =', [...motherTag.childNodes][2])
+    
+    // Contagem de elementos
+    console.log('motherTag.childElementCount =', motherTag.childElementCount)
+
+    // Outros
+    console.log('motherTag.firstChild =', motherTag.firstChild)
+    console.log('motherTag.lastChild =', motherTag.lastChild)
+    console.log('motherTag.nextSibling =', motherTag.nextSibling)
+  </script>
+</body>
+</html>

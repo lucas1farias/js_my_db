@@ -1,0 +1,76 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .circle-and-range {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3rem;
+    }
+
+    .circle {
+      height: 100px;
+      width: 100px;
+      border-radius: 50%;
+      background: linear-gradient(to right bottom, black, white);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="circle-and-range">
+      
+      <div class="circle"></div>
+      
+      <div class="range">
+        <input type="range" min="0" max="20" value="0" class="slider">
+      </div>
+
+      <div class="current-range-value">0</div>
+    </div>
+
+  </main>
+
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+
+    let inks = [
+      '#0f0', 'magenta', 'yellowgreen', 'orangered', 'yellow',
+      'black', 'white', 'deepink', 'aqua', 'salmon', 'gray',
+      'blue', 'crimson', 'green', 'orange'
+    ]
+    let circle = document.querySelector('.circle')
+    let slider = document.querySelector('.slider')
+    let rangeValue = document.querySelector('.current-range-value')
+    
+    // EXEMPLO 1
+    slider.addEventListener('change', () => {
+      let index = Math.floor(Math.random() * inks.length - 0)
+      let index2 = Math.floor(Math.random() * inks.length - 0)
+      
+      // Impedir que cores venham iguais
+      if (index != index2) {
+        circle.style.background = `linear-gradient(to right bottom, ${inks[index]},${inks[index2]})`
+      }
+      
+      console.log(circle.style.background)
+    })
+    
+    // EXEMPLO 2
+    // Distructuring sobre o próprio range
+    slider.addEventListener('change', ({target}) => {
+      // O atrib. "value" da tag range é aplicada a uma tag html
+      rangeValue.textContent = target.value
+    })
+  </script>
+</body>
+</html>

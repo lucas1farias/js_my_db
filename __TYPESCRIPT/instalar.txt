@@ -1,0 +1,124 @@
+
+
+===== INSTALAÇÃO =====
+* npm i typescript -D
+* No raiz do projeto, será criado "package.json", que mostra a versão atual 
+* Extensão: .ts
+
+===== COMPILAÇÃO =====
+* npx tsc nome_do_arquivo_typescript.ts (na compilação, é criado um arq. js)
+
+===== CONFIGURAR JSON P/ TYPESCRIPT =====
+* npm i ts-node -D
+* [Novo diretório: .vscode] [Novo módulo: settings.json]
+* Digitar "{code-runner.executorMap}", a IDE do Vscode completará uma série de propriedades ao json
+* O alvo principal é a chave "typescript", que é inicialmente "ts-node". Editar adicionando como no exemplo
+* Se houver algum erro, remover ou substituir "clear" por "cls", "&&", "--transpile-only"
+
+  {
+    "code-runner.executorMap": {
+      "typescript": "clear && npx ts-node --files",
+    }
+  }
+
+===== CONSOLE DE AJUDA P/ TYPESCRIPT =====
+* npx ts-node --help
+
+===== COMANDO ABORDADO, MAS NÃO USADO =====
+* npx tsc -w
+
+===== INSTALAÇÃO DO ESLint =====
+* npm i eslint -D
+* Instalar aplicação no Vscode chamada "ESlint" pelas extensões do Vscode
+* npm i @typescript-eslint/eslint-plugin @typescript-eslint/parser -D (2 dependências)
+* [Novo módulo: .eslintrc.js] e inserir o código abaixo
+* Em "extends", o plugin "prettier" é instalado na próxima etapa
+* Após inserir o conteúdo abaixo, salvar o arquivo e reiniciar a IDE
+
+module.exports = {
+  env: {
+    browser: true,
+    es6: true,
+    node: true,
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+  ],
+  globals: {
+    Atomics: 'readonly',
+    ShareArrayBuffer: 'readonly',
+  },
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 11,
+    sourceType: 'module',
+  },
+  plugins: ['@typescript-eslint'],
+  rules: {},
+};
+
+* Abrir o "settings.json" do Vscode e inserir o bloco abaixo (incluindo vírgula)
+
+,
+"editor.codeActionsOnSave": {
+  "source.fixAll.eslint": true,
+  "source.fixAll": true
+}
+
+===== INSTALAR PLUGIN: Prettier =====
+* npm i prettier eslint-config-prettier eslint-plugin-prettier -D
+* [Novo módulo: prettierrc.js] e inserir o bloco abaixo:
+
+module.exports = {
+  semi: false,
+  trailingComma: 'all',
+  singleQuote: true,
+  printWidth: 80,
+  tabWidth: 2,
+}
+
+* Códigos escritos em arquivos ".ts" com algum erro, são corrigidas em "ctrl + s"
+
+===== CRIAR PROJETO TYPESCRIPT =====
+* npx tsc --init (um arquivo "tsconfig.json" será criado)
+* Chaves relevantes a serem ativadas ou alteradas:
+  -> "target": "es5" (versão do EcmaScript que será executada no projeto)
+  -> "lib": ["ES2015" ou "ESNext", "DOM"] (dependências a serem usadas no projeto)
+  -> "outDir": "./dist" (caminho onde ficarão os módulos de complação)
+  -> "strict": true (ativa uma série de restrições. Para migração de base de dados, a recomendação foi mudar p/ false)
+  -> "esModuleInterop": true (equivalente a importação do Python)
+* [Novo diretório: src], criar 2 arquivos ".ts", p/ fazer o teste do "esModuleInterop"
+  
+  ex: sample.ts
+  export default () => {
+    console.log('...')
+  };
+  -> sample2.ts
+  import funcao from './mod' 
+  funcao();
+
+===== CONFIGURAR PASTA DE ENTRADA DOS MÓDULOS TYPESCRIPT =====
+* Abrir o diretório ".vscode" e abrir o módulo "settings.json"
+* Add o campo "include", com o nome da pasta que servirá de container
+  -> Modelo
+
+    {
+       "compilerOptions": {
+       },
+       "include": [
+         "./src"
+       ]
+     }
+
+===== COMPILAÇÃO =====
+* npx tsc
+* Uma pasta "dist" deve ser criada com as mesmas configurações encontradas em "src"
+* "src" = pasta de desenvolvimento / "dist" = pasta de produção
+* Ao tentar executar os arquivos em "dist", eles deve ser executados
+* Os arquivos em "dist" não devem ser alterados na fonte, os em "src" são alterados e então compilados
+  
+===== AÇÕES POSTERIORES A CONFIGURAÇÃO =====
+* Criar os módulos de typescript no diretório "src". Se for preciso diretórios aninhados, que sejam também dentro de "src"

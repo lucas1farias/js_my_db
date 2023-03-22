@@ -1,0 +1,51 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Destructuring</title>
+</head>
+<body>
+  <!-- 
+  -> "Desestruturação" é muito usado com eventos de escuta
+  -> No contexto deste tutorial, o recurso é usado num evento de escuta de "clique"
+  -> Esse recurso pode ser aplicado tanto para tags solo como em conjunto
+  -> Para tags em conjunto, precisamos do seletor "querySelectorAll" e do loop "forEach"
+  -> Eventos de escuta podem receber funções e elas não recebem parênteses (quando não há parâmetros)
+  -> Na função que vai ser usada pelo evento, usamos a sintaxe específica "{ target }"
+  -> "{ target }" = a iteração de cada elemento vindo de "tagsDiv"
+  -> "{ target }" = monitora cada elemento, que ao ser clicado, ativa a função vinculada
+  -> A cada tag clicada, alguns atributos delas são modificados
+  -->
+  
+
+  <div class="clicked">1</div>
+  <div class="clicked">2</div>
+  <div class="clicked">3</div>
+  <div class="clicked">4</div>
+  <div class="clicked">5</div>
+
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    let tagsDiv = document.querySelectorAll('.clicked')
+
+    function changeSomeProperties({target}) {
+      target.style.color = '#222'
+      target.style.textShadow = '0 0 10px #fff'
+      target.style.boxShadow = '0 0 10px #fff'
+      target.style.backgroundColor = '#fff'
+      target.style.border = 'solid 1px #222'
+      target.style.transition = 'ease-in-out all 1s'
+    }
+
+    tagsDiv.forEach(element => {
+      // Função sendo chamada sem parâmetros (distructuring)
+      element.addEventListener('click', changeSomeProperties)
+    })
+  </script>
+</body>
+</html>

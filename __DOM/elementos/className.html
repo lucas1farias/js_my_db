@@ -1,0 +1,32 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+</head>
+<body>
+  <div></div>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Cria um atributo de classe p/ uma tag
+    // Para fazer isso, é preciso que a tag possua um elemento
+    // Com o elemento da tag, o atributo "className" é definido
+    
+    let tagDiv = document.querySelector('div')
+    console.log(tagDiv)
+    
+    // AQUI
+    tagDiv.className = 'void'
+    
+    tagDiv.textContent = `[${tagDiv}, ${tagDiv.className}]`
+  </script>
+</body>
+</html>

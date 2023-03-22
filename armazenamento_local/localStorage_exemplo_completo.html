@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      background-color: #111;
+      color: ivory;
+    }
+    
+    main {
+      border: aqua solid 1px;
+      display: flex;
+      flex-flow: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+  </style>
+</head>
+<body>
+  <main>
+    <input type="text" id="sample" placeholder="Digite algo">
+    <div id="output"></div>
+    
+    <input type="button" id="remove-btn" value="Remover var local 'temp'">
+    <input type="button" id="add-btn" value="Criar var local 'temp'">
+  </main>
+  <script>
+    /*
+    Recurso usado no html (botão ->, inspecionar, clicar em >> ou application, local storage, clicar no ip local)
+    Para ver todos os exemplos funcionando, abrir o caminho especificado acima
+    */
+
+    let inputEl = document.getElementById('sample')
+    let divEl = document.getElementById('output')
+    let removeButtonEl = document.getElementById('remove-btn')
+    let addButtonEl = document.getElementById('add-btn')
+    
+    // Serve tanto p/ criar quanto p/ editar
+    function createLocalVar({localVarName, newValue}) {
+      return localStorage.setItem(localVarName, newValue)
+    }
+
+    function getLocalVar({localVarName}) {
+      return localStorage.getItem(localVarName)
+    }
+
+    function removeLocalVar({localVarName}) {
+      localStorage.removeItem(localVarName)
+    }
+    
+    // Criação, edicação do valor, e remoção de uma var "sample" em "localStorage" baseado nos segundos
+    setInterval(() => {
+      let timer = new Date().getSeconds()
+      let three = timer % 3 === 0
+      let five = timer % 5 === 0
+      
+      // Criação
+      let varLocalStorage = createLocalVar({localVarName: 'sample', newValue: '0'})
+      let varLocalStorageValue = getLocalVar({localVarName: 'sample'})
+      divEl.textContent = varLocalStorageValue
+      
+      // Edição
+      if (three) {
+        varLocalStorage = createLocalVar({localVarName: 'sample', newValue: '1'})
+        varLocalStorageValue = getLocalVar({localVarName: 'sample'})
+        divEl.textContent = varLocalStorageValue
+      }
+      
+      // Remoção
+      if (five) {
+        removeLocalVar({localVarName: 'sample'})
+      }
+    })
+    
+    // O que for digitado no input se torna valor de uma var "input" em "localStorage"
+    let loop = setInterval(() => {
+      let varCreated = createLocalVar({localVarName: 'input', newValue: inputEl.value})
+    }, 1)
+
+    // No botão 1 é criado uma var "temp" em "localStorage", enquanto o botão 2 a remove
+    createLocalVar({localVarName: 'temp', newValue: 'void'})
+    removeButtonEl.addEventListener('click', () => {
+      removeLocalVar({localVarName: 'temp'})
+    })
+    addButtonEl.addEventListener('click', () => {
+      createLocalVar({localVarName: 'temp', newValue: 'void'})
+    })
+  </script>
+</body>
+</html>

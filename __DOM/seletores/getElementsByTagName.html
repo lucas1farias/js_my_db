@@ -1,0 +1,42 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pegar todos os elementos por sua tag</title>
+</head>
+<body>
+  <div>Tag div 1</div>
+  <div>Tag div 2</div>
+  <span>Tag div 2</span>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Coleta todas as tags especificadas como parâmetro
+    // SINTAXE: document.getElementsByTagName('nome_tag')
+    // Gera um "HTML COLLECTION", que não é um array
+    // Usar somente quando for coletar MÚLTIPLOS DADOS (recurso serve como array, se convertido)
+
+    let tagsDiv = document.getElementsByTagName('div')
+    console.log('ANTES DA CONVERSÃO P/ ARRAY', tagsDiv)
+    
+    // Conversão do HTML COLLECTION p/ array
+    tagsDiv = [...tagsDiv]
+    
+    // Uso do array
+    tagsDiv.forEach(eachElement => {
+      console.log(eachElement)
+    })
+
+    // Outro acesso
+    console.log('tagsDiv[0] =', tagsDiv[0])
+    console.log('tagsDiv[1] =', tagsDiv[1])
+  </script>
+</body>
+</html>

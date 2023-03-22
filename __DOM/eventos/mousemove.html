@@ -1,0 +1,28 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>addEventListener('mousemove')</title>
+</head>
+<body>
+  <main>
+    <div class="mouse-xy">0</div>
+  </main>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    
+    let mouse = document.querySelector('.mouse-xy')
+
+    // Para capturar toda a tela, o evento deve ser independente
+    addEventListener('mousemove', event => {
+      mouse.textContent = `x=${event.x} y=${event.y}`
+    })
+  </script>
+</body>
+</html>

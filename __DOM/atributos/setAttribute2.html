@@ -1,0 +1,40 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar atributo customizado</title>
+</head>
+<body>
+  <a href=""></a>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+    
+    // Criar atributos customizáveis para uma tag
+    // É mandatório a sintaxe "data-", e o que vier após é opcional
+    
+    // Criação do elemento
+    let element = document.createElement('div')
+    
+    // AQUI
+    // Atributo criado para o elemento [elemento.método(nome, valor)]
+    element.setAttribute('data-language', 'javascript')
+    
+    // Anexação do elemento
+    document.body.appendChild(element)
+
+    // Definindo o valor do atributo como valor do texto do elemento
+    element.textContent = element.attributes['data-language'].value
+
+    let linkTag = document.querySelector('a')
+    linkTag.setAttribute('href', 'https://www.google.com')
+    linkTag.textContent = linkTag.getAttribute('href')
+  </script>
+</body>
+</html>

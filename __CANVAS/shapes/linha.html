@@ -1,0 +1,78 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Como desenhar um círculo</title>
+  <style>
+    section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section>
+      <div>
+        <canvas></canvas>
+      </div>
+    </section>
+  </main>
+  
+  <script>
+    const canvas = document.querySelector('canvas')
+    const cv = canvas.getContext('2d')
+    canvas.width = 1200
+    canvas.height = 600
+    canvas.style.border = 'crimson solid 3px'
+    document.body.style.backgroundImage = 'radial-gradient(#222, #444, black)'
+
+    class Thread {
+      constructor({leftOffset, topOffset, width, floorProximity}) {
+        // Atribs. mandatórios
+        this.leftOffset = leftOffset
+        this.topOffset = topOffset
+        this.width = width
+        this.floorProximity = floorProximity
+      }
+
+      draw() {
+        cv.beginPath()
+        cv.strokeStyle = 'yellow'
+        cv.lineWidth = 3
+        cv.moveTo(this.leftOffset, this.topOffset)  
+        cv.lineTo(this.width, this.floorProximity)
+        cv.stroke() 
+        cv.closePath()
+      }
+    }
+
+    let circle = undefined
+
+    function init() {
+      thread = new Thread({
+        leftOffset: 0,
+        topOffset: 0,
+        width: 300,
+        floorProximity: 400
+      })
+    }
+
+    function animate() {
+      requestAnimationFrame(animate)
+  
+      cv.clearRect(0, 0, canvas.width, canvas.height)
+      thread.draw()
+    }
+    
+    init()
+    animate()
+  </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anexar tag criada</title>
+</head>
+<body>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Anexar uma tag recem criada ao corpo do html
+    // Ela costuma ser dependente da função "createElement"
+
+    let divTag = document.createElement('div')
+    let pTag = document.createElement('p')
+    let spanTag = document.createElement('span')
+    
+    // ANEXAÇÃO AO CORPO
+    document.body.appendChild(divTag)
+    
+    // ANEXAÇÃO DAS TAGS FILHAS
+    divTag.appendChild(pTag)
+    divTag.appendChild(spanTag)
+
+    divTag.style.border = 'aqua solid 1px'
+
+    pTag.style.border = 'yellow solid 1px'
+    pTag.textContent = pTag
+
+    spanTag.style.border = 'green solid 1px'
+    spanTag.textContent = spanTag
+  </script>
+</body>
+</html>

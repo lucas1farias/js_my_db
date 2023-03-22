@@ -1,0 +1,77 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Como desenhar um círculo</title>
+  <style>
+    section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section>
+      <div>
+        <canvas></canvas>
+      </div>
+    </section>
+  </main>
+  
+  <script>
+    const canvas = document.querySelector('canvas')
+    const cv = canvas.getContext('2d')
+    canvas.width = 1200
+    canvas.height = 600
+    canvas.style.border = 'crimson solid 3px'
+    document.body.style.backgroundImage = 'radial-gradient(#222, #444, black)'
+
+    class Circle {
+      constructor({ x, y, size}) {
+        // Atribs. mandatórios
+        this.x = x
+        this.y = y
+        this.size = size
+      }
+
+      draw() {
+        cv.beginPath()
+        cv.fillStyle = 'yellow'
+        cv.strokeStyle = 'crimson'
+        cv.lineWidth = 3
+        cv.arc(this.x, this.y, this.size, 0, Math.PI * 2, false)
+        cv.fill()
+        cv.stroke() 
+        cv.closePath()
+      }
+    }
+
+    let circle = undefined
+
+    function init() {
+      circle = new Circle({
+        x: 100,
+        y: 100,
+        size: 25
+      })
+    }
+
+    function animate() {
+      requestAnimationFrame(animate)
+  
+      cv.clearRect(0, 0, canvas.width, canvas.height)
+      circle.draw()
+    }
+    
+    init()
+    animate()
+  </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pegar elemento pelo seu id</title>
+</head>
+<body>
+  <div id="hashtag">Tag id</div>
+  <p></p>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Coleta alguma tag que tinha um atributo id com valor instanciado
+    // SINTAXE: document.getElementById('valor_atrib_id')
+    // Usar somente quando for coletar UM DADO (recurso não serve como array)
+
+    let tagDiv = document.getElementById('hashtag')
+    let report = document.querySelector('p')
+    report.textContent = `O que é a tag id? ${tagDiv}`
+  </script>
+</body>
+</html>

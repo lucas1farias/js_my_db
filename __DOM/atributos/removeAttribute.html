@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coletar valor de um atributo</title>
+</head>
+<body>
+  <a href="https://google.com"></a>
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Remove o valor de algum atributo de uma tag
+
+    let aTagValue = document.querySelector('a')
+
+    // AQUI
+    aTagValue.removeAttribute('href')
+  </script>
+</body>
+</html>

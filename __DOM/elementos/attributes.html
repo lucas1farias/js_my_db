@@ -1,0 +1,50 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pegar atributos</title>
+</head>
+<body>
+  <img src="#" alt="Descrição da imagem">
+  <div data-atrib="atrib-value"></div>
+  <a href="#" class="link"></a>
+
+  <p></p>
+  <p></p>
+  <p></p>
+  <p></p>
+  <p></p>
+
+  <script>
+    document.body.style.backgroundColor = '#222'
+    document.body.style.color = '#0f0'
+    document.body.style.fontFamily = 'consolas'
+    document.body.style.letterSpacing = '3px'
+
+    // Mostrar como resgatar valores de atributos de tags
+    // Em todos os casos é preciso, ao final, usar ".value"
+    // Essa função é = getAttribute('nome atrib')
+
+    let imgTag = document.querySelector('img')
+    let customAtribTag = document.querySelector('div[data-atrib]')
+    let linkTag = document.querySelector('.link')
+
+    let report = document.querySelector('p:nth-of-type(1)')
+    let report2 = document.querySelector('p:nth-of-type(2)')
+    let report3 = document.querySelector('p:nth-of-type(3)')
+    let report4 = document.querySelector('p:nth-of-type(4)')
+    let report5 = document.querySelector('p:nth-of-type(5)')
+    
+    // AQUI
+    report.textContent = `[${imgTag.attributes.src.value}, ${imgTag.attributes.alt.value}]`
+    report2.textContent = `[${customAtribTag.attributes['data-atrib'].value}]`
+    report3.textContent = `[${imgTag.getAttribute('src')}, ${imgTag.getAttribute('alt')}]`
+    report4.textContent = `[${customAtribTag.getAttribute('data-atrib')}]`
+    report5.textContent = `[${linkTag.getAttribute('class')}, ${linkTag.attributes.class.value}, ${linkTag.attributes.href.value}]`
+  </script>
+</body>
+</html>

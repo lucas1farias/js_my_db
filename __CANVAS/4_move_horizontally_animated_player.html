@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deslocamento em X</title>
+</head>
+<body>
+  <canvas></canvas>
+  <script>
+
+    document.body.style.backgroundColor = 'black'
+    document.body.style.display = 'flex'
+    document.body.style.display = 'flex'
+    document.body.style.alignItems = 'center'
+    document.body.style.justifyContent = 'center'
+    document.body.style.minHeight = '100vh'
+
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas.getContext('2d')
+
+    canvas.width = 1200
+    canvas.height = 600
+
+    function createPlayer() {
+      player = new Player()
+    }
+
+    function init() {
+      createPlayer()
+    }
+
+    function animate() {
+      ctx.fillStyle = '#222'
+      ctx.fillRect(0, 0, innerWidth, innerHeight)
+      
+      player.draw()
+      player.frameAdmin()
+      
+      player.horizontalOffset() // a_b
+      player.pressedRightOrLeft({horizontalOffsetSpeed: 3.3}) // a_c
+      
+      requestAnimationFrame(animate)
+    }
+
+    class Player {
+      constructor() {
+        this.wolfSetup = {
+          
+          idleRight: {
+            widthList: [0, 178, 353, 526, 693, 864, 1039], 
+            widthList2: [178, 176, 173, 167, 170, 172, 176],
+            srcHeight: 167,
+            frameAmount: 6
+          },
+          
+          idleLeft: {
+            widthList: [0, 178, 353, 526, 693, 864, 1039], 
+            widthList2: [178, 176, 173, 167, 170, 172, 176],
+            srcHeight: 167,
+            frameAmount: 6
+          },
+          
+          walkRight: {
+            widthList: [0, 178, 356, 530, 710, 893, 1080, 1260, 1440], 
+            widthList2: [178, 178, 176, 178, 182, 182, 180, 180, 180],
+            srcHeight: 167,
+            frameAmount: 8
+          },
+          
+          walkLeft: {
+            widthList: [1440, 1265, 1087, 907, 722, 540, 360, 178, 0], 
+            widthList2: [180, 176, 176, 182, 182, 182, 180, 180, 180],
+            srcHeight: 167,
+            frameAmount: 8
+          }
+        }
+        
+        this.reference = new Image()
+        this.reference.src = 'img/player/wolf_idle_right.gif'
+        
+        this.surfaceHeight = 61
+        this.playerHeight = 60 
+        
+        this.image = this.reference                                                      
+        this.widthList = this.wolfSetup.idleRight.widthList                      
+        this.frameCounter = 0                                                  
+        this.fixedHeight = 0                                                   
+        this.widthList2 = this.wolfSetup.idleRight.widthList2                  
+        this.srcHeight = this.wolfSetup.idleRight.srcHeight                    
+        this.whereX = 100                                                      
+        this.whereY = canvas.height - (this.playerHeight + this.surfaceHeight) 
+        this.canvasWidth = 60                                                  
+        this.canvasHeight = 60                                                 
+        
+        this.modularCounter = 0                                                
+        this.modular = 5                                                        
+        this.frameAmount = this.wolfSetup.idleRight.frameAmount
+        
+        this.keys = {
+          d: { pressed: false },
+          a: { pressed: false }
+        }
+
+        // a_a: Objeto JS que controlará a posição "x" e "y" do jogador
+        this.speed = {x: 0, y: 0}
+      }
+
+      draw() {
+        ctx.drawImage(
+          this.image,
+          this.widthList[this.frameCounter],
+          this.fixedHeight,
+          this.widthList2[this.frameCounter],
+          this.srcHeight,
+          this.whereX,
+          this.whereY,
+          this.canvasWidth,
+          this.canvasHeight
+        )
+      }
+
+      timeToLoadNextImage() {
+        return this.modularCounter % this.modular === 0
+      }
+
+      isInsideThreshold() {
+        return this.frameCounter < this.frameAmount
+      }
+
+      keepChangingSprites() {
+        this.frameCounter++
+      }
+
+      resetSpritesCountage() {
+        this.frameCounter = 0
+      }
+
+      frameCounterReachesThreshold(maxValue) {
+        return this.modularCounter == maxValue
+      }
+
+      resetFrameCounter() {
+        this.modularCounter = 0
+      }
+
+      frameAdmin() {
+        this.modularCounter++
+
+        if (this.timeToLoadNextImage()) {
+          if (this.isInsideThreshold()) {
+            this.keepChangingSprites()
+          } else {
+            this.resetSpritesCountage()
+          }
+        }
+        
+        if (this.frameCounterReachesThreshold(25)) {
+          this.resetFrameCounter()
+        }
+      }
+
+      // a_b: Função que altera a posição "x" e "y" do jogador
+      horizontalOffset() {
+        this.whereX += this.speed.x
+      }
+      
+      // a_c: Função que add velocidade (conversa diretamente com horizontalOffset)
+      pressedRightOrLeft({horizontalOffsetSpeed}) {
+        const goLeft = -horizontalOffsetSpeed
+        const goRight = horizontalOffsetSpeed
+        const goIdle = 0
+        
+        if (this.keys.a.pressed) {
+          this.speed.x = goLeft // ir <-
+        } else if (this.keys.d.pressed) {
+          this.speed.x = goRight // ir ->
+        } else {
+          this.speed.x = goIdle // parar
+        }
+      }
+
+      loadSprite(action) {
+        if (action === 'idle_right') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_idle_right.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.idleRight.widthList
+          this.widthList2 = this.wolfSetup.idleRight.widthList2
+          this.srcHeight = this.wolfSetup.idleRight.srcHeight
+          this.frameAmount = this.wolfSetup.idleRight.frameAmount
+        } 
+        
+        else if (action === 'idle_left') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_idle_left.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.idleLeft.widthList
+          this.widthList2 = this.wolfSetup.idleLeft.widthList2
+          this.srcHeight = this.wolfSetup.idleLeft.srcHeight
+          this.frameAmount = this.wolfSetup.idleLeft.frameAmount
+        } 
+        
+        else if (action === 'walk_right') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_walk_right.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.walkRight.widthList
+          this.widthList2 = this.wolfSetup.walkRight.widthList2
+          this.srcHeight = this.wolfSetup.walkRight.srcHeight
+          this.frameAmount = this.wolfSetup.walkRight.frameAmount
+        } 
+        
+        else if (action === 'walk_left') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_walk_left.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.walkLeft.widthList
+          this.widthList2 = this.wolfSetup.walkLeft.widthList2
+          this.srcHeight = this.wolfSetup.walkLeft.srcHeight
+          this.frameAmount = this.wolfSetup.walkLeft.frameAmount
+        } 
+      }
+
+      manner(state) {
+        if (state == 'idle_facing_right') {
+          this.keys.d.pressed = false
+          return this.keys.d.pressed
+        }
+        
+        else if (state == 'idle_facing_left') {
+          this.keys.a.pressed = false
+          return this.keys.a.pressed
+        }
+        
+        else if (state == 'walking_right') {
+          this.keys.d.pressed = true
+          return this.keys.d.pressed
+        }
+        
+        else if (state == 'walking_left') {
+          this.keys.a.pressed = true
+          return this.keys.a.pressed
+        }
+      }
+    }
+
+    let player = undefined
+    
+    init()
+    animate()
+    
+    addEventListener('keyup', ({ key }) => {
+    switch (key) {
+      
+      case 'd':
+        player.manner('idle_facing_right')
+        player.loadSprite('idle_right')
+        break
+      
+      case 'a':
+        player.manner('idle_facing_left')
+        player.loadSprite('idle_left')
+        break
+      }
+    })
+
+    addEventListener('keydown', ({ key }) => {
+      switch (key) {
+
+        case 'd':
+          player.manner('walking_right')
+          player.loadSprite('walk_right')
+          break
+
+        case 'a':
+          player.manner('walking_left')
+          player.loadSprite('walk_left')
+          break
+      }
+    })
+  
+  </script>
+</body>
+</html>

@@ -1,7 +1,5 @@
 
 
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,19 +27,29 @@
 
     /*
       ========== DETALHES INICIAIS ==========
-      * Recortar a imagem do seu "spritesheet" que represente a parte da ação desejada animar
-      * Supondo que se tenha um "spritesheet" com várias ações. Uma delas é recortada
+      * "Spritesheet" é um conjunto de imagens de mesmo tamanho e alinhadas igualmente, que representam as ações de algo
+      * Cada conjunto de imagens fica normalmente disposto na horizontal, e agrupados na vertical (por ser + de 1)
+      * Um jogador/persongem animado, possui vários movimentos, todos eles são anexados num "Spritesheet"
+      * Dentre os vários "estados" exibidos num "Spritesheet", recortamos um deles p/ configurá-los separadamente
+      * Recortar a imagem do "Spritesheet" que represente a parte da ação desejada animar
       * O recorte passa por duas etapas de edição
-      * A etapa 1 é recortar cada imagem da sequência, p/ que elas fiquem bem próximas umas das outras 
+      * A etapa 1 é recortar cada imagem horizontal da sequência, p/ que elas fiquem bem próximas umas das outras 
         (MOTIVO: tornar precisa colisões laterais e excluir excedentes de espaços laterias)
       * A etapa 2 é recortar o máximo do topo e do fundo da imagem 
         (MOTIVOS: tornar precisas colisões verticais)
 
       ========== Como fazer a etapa 1? ========== 
-      * Pegar o lado -> de cada imagem, e pelo paint, ver a posição "x" no canto esquerdo da tela (x, y)
+      * Um "Spritesheet" possui imagens espaçadas, e isso não é desejado
+      * O objetivo da etapa 1 é basicamente deixar essas imagens o mais juntas possível
+      * EX: Vamos supor que "xD" seja um "Spritesheet"
+      * O estado atual de "xD", seria || xD   xD   xD   xD
+      * O estado desejado de "xD" é   || xDxDxDxD
+      * Isso é a etapa 1. Como fazer isso? No PAINT, seguindo as instruções abaixo 
+      * Pegar o lado -> de cada imagem, e pelo paint, ver a posição "x" (no paint, fica no canto esquerdo da tela (x, y))
       * Achando o "x", subir o mouse ao topo da tela nesta posição "x" (achar o y=1, pois y=0 é muito difícil)
-      * Descer o mouse, mantendo-o pressionado até o fundo da imagem
-      * Com as setas do teclado, direcionar a imagem selecionada até o mais próximo da <- possível
+      * Descer o mouse, mantendo-o pressionado até o fundo da imagem e puxar até o LIMITE da imagem à <-
+      * Supondo que a imagem seja um lobo, e o final da imagem a <- é sua calda, então esse é o LIMITE
+      * Com a imagem selecionada, usar as setas do teclado p/ direcionar a imagem o mais próximo da <- possível
       * Fazer o mesmo procedimento com todas as imagens do "spritesheet" até todas estarem alinhadas e minimamente próximas
       
       ========== Como fazer a etapa 2? ==========
@@ -56,7 +64,7 @@
       ========== DETALHES FINAIS ==========
       * As etapas 1 e 2 são essenciais, mas se ao final, os "Spritessheets" não tiverem as mesmas dimensões, leia abaixo
       * O paint possui uma ferramenta "Redimensionar" e as opções "Pixels" e "Manter taxa de proporção"
-      * Essa ferramente se torna IMPORTANTE pelo contexto descrito abaixo
+      * Essa ferramente tornará os "Spritesheets" todos semelhantes, evitando anomalias entre as transições de "sprites"
     */
 
     // ========== OBS: "ADD APÓS TUTORIAL" ensina como add novas animações pós configuração inicial ==========
@@ -135,9 +143,12 @@
           },
         }
         
-        // Imagem inicial do jogador antes de qualquer animação ser feita
+        /*
+          Imagem inicial do jogador antes de qualquer animação ser feita
+          Após a primeira animação ser feita, o "src" já pode apontar p/ o "Spritesheet" referência
+        */
         this.reference = new Image()
-        this.reference.src = 'pilot_image.png'
+        this.reference.src = 'img/player/pilot_image.png'
         
         // Variáveis não mandatórias, mas úteis p/ simular como se o jogador estivesse numa superfície
         this.surfaceHeight = 61
@@ -208,8 +219,8 @@
         this.frameCounter = 0
       }
 
-      frameCounterReachesThreshold() {
-        return this.modularCounter == 1000
+      frameCounterReachesThreshold(maxValue) {
+        return this.modularCounter == maxValue
       }
 
       resetFrameCounter() {
@@ -229,7 +240,7 @@
         }
         
         // Não mandatório, apenas p/ não deixar "this.modularCounter" ++ eternamente
-        if (this.frameCounterReachesThreshold()) {
+        if (this.frameCounterReachesThreshold(25)) {
           this.resetFrameCounter()
         }
       }
@@ -237,7 +248,7 @@
       loadSprite(action) {
         if (action === 'idle_right') {
           this.reference = new Image()
-          this.reference.src = 'wolf_idle_right.gif'
+          this.reference.src = 'img/player/wolf_idle_right.gif'
           this.image = this.reference
           this.widthList = this.wolfSetup.idleRight.widthList
           this.widthList2 = this.wolfSetup.idleRight.widthList2
@@ -247,7 +258,7 @@
         // ADD APÓS TUTORIAL
         else if (action === 'idle_left') {
           this.reference = new Image()
-          this.reference.src = 'wolf_idle_left.gif'
+          this.reference.src = 'img/player/wolf_idle_left.gif'
           this.image = this.reference
           this.widthList = this.wolfSetup.idleLeft.widthList
           this.widthList2 = this.wolfSetup.idleLeft.widthList2
@@ -269,7 +280,6 @@
       }
     }
 
-    // b_f: ANTES: [let new Player()] Criação do objeto do jogador / q_a: Após criar o fosso de queda, o valor muda 
     let player = undefined
     
     init()

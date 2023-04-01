@@ -28,3 +28,24 @@ console.log(`34 é divisível por 3? ${34 % 3 === 0 ? 'sim' : 'não'}`)
 let isAdult = age => age >= 18 ? 'Adulto' : 'Menor de idade'
 console.log('[DECLARATIVA]', isAdult(18))
 console.log('[DECLARATIVA]', isAdult(17))
+
+// OUTRO EXEMPLO
+let conditions = [
+    // Tratando condições com operador ternário: condição ? if : else
+    personChoice == 'pedra' && computerChoice == 'pedra' ? draw : '',
+    personChoice == 'papel' && computerChoice == 'papel' ? draw : '',
+    personChoice == 'tesoura' && computerChoice == 'tesoura' ? draw : '',
+    personChoice == 'pedra' && computerChoice == 'tesoura' ? victory : '',
+    personChoice == 'pedra' && computerChoice == 'papel' ? loss : '',
+    personChoice == 'papel' && computerChoice == 'pedra' ? victory : '',
+    personChoice == 'papel' && computerChoice == 'tesoura' ? loss : '',
+    personChoice == 'tesoura' && computerChoice == 'papel' ? victory : '',
+    personChoice == 'tesoura' && computerChoice == 'pedra' ? loss : '',
+]
+                
+// Achando a condição que foi satisfeita (!= undefined)
+conditions.forEach(condition => {
+    if (condition) {
+        result.textContent = condition
+    }
+})

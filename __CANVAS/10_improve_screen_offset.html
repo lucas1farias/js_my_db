@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deslocamento em X</title>
+  <title>Melhorar deslocamento da tela</title>
 </head>
 <body>
   <canvas></canvas>
@@ -24,24 +24,128 @@
 
     canvas.width = 1200
     canvas.height = 600
+    
+    // Função auxiliar que ajuda a criar lacunas entre objetos no Canvas
+    function range(min, max, float = false) {
+        if (float) {
+          return Math.random() * (max - min + 1) + min
+        }
+        return Math.floor(Math.random() * (max - min + 1) + min)
+    }
 
     function createPlayer() {
       player = new Player()
     }
+    
+    function terrainConfig({contentBox, imgRef, amount}) {
+      /*
+      ========== CRIAÇÃO DO PRIMEIRO TERRENO ==========
+      O primeiro terreno é a matriz para todos os outros, seus valores servirão como referência
+      */
+      let canvasBottom = 540
+      let terrain = new Image()
+      terrain.src = imgRef
+
+      let firstFloor = new Thing(
+        {
+          image: terrain, 
+          x: 0, 
+          y: canvasBottom, 
+          width: terrain.width, 
+          height: terrain.height
+        }
+      )
+      contentBox.push(firstFloor)
+      
+      /*
+      ========== CRIAÇÃO DOS TERRENOS FILHOS ==========
+      A imagem principal têm "x/width=499", as seguintes pegam esse valor + uma "lacuna" com range(80, 140)
+      O objetivo disso é criar fossos, onde caso o jogador caia, ele é punido
+      */
+      for (let i = 1; i <= amount; i++) {
+        let gapMin = 80
+        let gapMax = 140
+        let imageRightEdge = terrain.width
+        let newFloor = new Thing(
+          {
+            image: terrain, 
+            x: contentBox[i - 1].x + range(imageRightEdge + gapMin, imageRightEdge + gapMax, true),
+            y: canvasBottom, 
+            width: terrain.width, 
+            height: terrain.height
+          }
+        )
+        contentBox.push(newFloor)
+      }
+    }
+
+    function landscapeConfig({contentBox, imgRef, h, v}) {
+      let theImage = new Image()
+      theImage.src = imgRef
+
+      let newLandscape = new Landscape(
+        {
+          image: theImage,
+          x: h,
+          y: v,
+          width: theImage.width,
+          height: theImage.height
+        }
+      )
+      contentBox.push(newLandscape)
+    }
+    
+    function canvasAdd({content, contentBox}) {
+      if(content === 'landscape') {
+        contentBox.forEach(landscape => {
+          landscape.draw()
+        })
+      }
+      
+      if (content === 'terrain') {
+        contentBox.forEach(terrain => {
+          terrain.draw()
+        })
+      }
+    }
+    
+    function interaction({reference, against}) {
+      if (against === 'landscape') {
+        // a_b: Por isso, todos os objetos nesta função teram seu valor == ao deslocamento em "x" do jogador
+        reference.scenarioMotion({obstacle: landscapes, offset: 5})
+      }
+      
+      else if (against === 'terrain') {
+        reference.scenarioMotion({obstacle: terrains, offset: 5}) 
+      }
+    }
 
     function init() {
+      landscapeConfig({contentBox: landscapes, imgRef: mainbackground, h: 0, v: 0}) 
+      landscapeConfig({contentBox: landscapes, imgRef: hills, h: 0, v: 0})  
+      terrainConfig({contentBox: terrains, imgRef: terrain, amount: 50})
       createPlayer()
     }
 
     function animate() {
       ctx.fillStyle = '#222'
       ctx.fillRect(0, 0, innerWidth, innerHeight)
+
+      canvasAdd({content: 'landscape', contentBox: landscapes})
+      canvasAdd({content: 'terrain', contentBox: terrains}) 
       
       player.draw()
       player.frameAdmin()
       
-      player.horizontalOffset() // a_b
-      player.pressedRightOrLeft({horizontalOffsetSpeed: 3.3}) // a_c
+      player.horizontalOffset()
+      // a_b: É recomendável que o valor do deslocamento em "x" do jogador deve ser == ao dos objetos
+      player.pressedRightOrLeft({horizontalOffsetSpeed: 5}) 
+
+      player.verticalOffset()           
+      player.fall({jumpOffsetSpeed: 1})
+
+      interaction({reference: player, against: 'landscape'}) 
+      interaction({reference: player, against: 'terrain'}) 
       
       requestAnimationFrame(animate)
     }
@@ -91,7 +195,7 @@
         this.fixedHeight = 0                                                   
         this.widthList2 = this.wolfSetup.idleRight.widthList2                  
         this.srcHeight = this.wolfSetup.idleRight.srcHeight                    
-        this.whereX = 100                                                      
+        this.whereX = 100                                                       
         this.whereY = canvas.height - (this.playerHeight + this.surfaceHeight) 
         this.canvasWidth = 60                                                  
         this.canvasHeight = 60                                                 
@@ -102,11 +206,14 @@
         
         this.keys = {
           d: { pressed: false },
-          a: { pressed: false }
+          a: { pressed: false },
+          w: { pressed: false }
         }
 
-        // a_a: Objeto JS que controlará a posição "x" e "y" do jogador
         this.speed = {x: 0, y: 0}
+        
+        // a_a: Controlador da movimentação do cenário
+        this.motionTrigger = false  
       }
 
       draw() {
@@ -163,23 +270,67 @@
         }
       }
 
-      // a_b: Função que altera a posição "x" do jogador
       horizontalOffset() {
         this.whereX += this.speed.x
       }
       
-      // a_c: Função que add velocidade (conversa diretamente com horizontalOffset)
       pressedRightOrLeft({horizontalOffsetSpeed}) {
         const goLeft = -horizontalOffsetSpeed
         const goRight = horizontalOffsetSpeed
         const goIdle = 0
+
+        let rightBoundary = canvas.width / 1.7 
+        let leftBoundary = canvas.width / 4    
+        let playerCanGoRight = this.whereX < rightBoundary
+        let playerCanGoLeft = this.whereX > leftBoundary
+        let playerMovesLeft = this.keys.a.pressed
+        let playerMovesRight = this.keys.d.pressed
         
-        if (this.keys.a.pressed) {
-          this.speed.x = goLeft // ir <-
-        } else if (this.keys.d.pressed) {
-          this.speed.x = goRight // ir ->
+        /*
+          a_a:
+          Enquanto o jogador não alcançar o limiar da tela: "this.motionTrigger = false"
+          OBJETIVO: Fazer o jogador se movimentar até um certo ponto, enquanto o resto a sua volta fica parado
+          OBJETIVO: Assim que o limiar for alcançado, os objetos em volta do jogador passam a se mexer, e ele para
+          O deslocamento dos objetos acontece acontece na função "scenarioMotion"
+        */
+        if (playerMovesLeft && playerCanGoLeft) {
+          this.motionTrigger = false
+          this.speed.x = goLeft
+          
+        } else if (playerMovesRight && playerCanGoRight) {
+          this.motionTrigger = false
+          this.speed.x = goRight
+          
         } else {
-          this.speed.x = goIdle // parar
+          this.motionTrigger = true
+          this.speed.x = goIdle
+          
+        }
+      }
+
+      verticalOffset() {
+        this.whereY += this.speed.y
+      }
+
+      pressedUpOrDown({verticalOffsetSpeed}) {
+        const goUp = -verticalOffsetSpeed
+        
+        if (this.keys.w.pressed) {
+          this.speed.y = goUp
+        } else {
+          this.speed.y = 0
+        }
+      }
+
+      fall({jumpOffsetSpeed}) {
+        const goUp = jumpOffsetSpeed
+        const idle = 0
+        
+        if (this.whereY + this.playerHeight + this.surfaceHeight + this.speed.y <= canvas.height) {
+          this.speed.y += goUp
+        } 
+        else {
+          this.speed.y = idle
         }
       }
 
@@ -246,9 +397,56 @@
           return this.keys.a.pressed
         }
       }
+    
+      scenarioMotion({obstacle, offset}) {
+        // a_a: Os objetos passam a se mexer alterando seu atributo "x", depois que "this.motionTriiger = true"
+        if (this.motionTrigger && this.keys.d.pressed) {
+          obstacle.forEach(index => {
+            index.x -= offset
+          })
+        } 
+        else if (this.motionTrigger && this.keys.a.pressed) {
+          obstacle.forEach(index => {
+            index.x += offset
+          })
+        }}
+    }
+
+    class Landscape {
+      constructor({image, x, y, width, height}) {
+        this.image = image
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+      }
+
+      draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)  
+      }
+    } 
+    
+    class Thing {
+      constructor({ image, x, y, width, height }) {
+        this.image = image
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+      }
+    
+      draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+      }
     }
 
     let player = undefined
+    let landscapes = []
+    let terrains = [] 
+    
+    const mainbackground = 'img/background/background.png'
+    const hills = 'img/background/hills.png'
+    const terrain = 'img/terrain/mario_world_terrain.png'
     
     init()
     animate()
@@ -265,6 +463,10 @@
         player.manner('idle_facing_left')
         player.loadSprite('idle_left')
         break
+      
+      case 'w':
+        player.keys.w.pressed = false
+        break
       }
     })
 
@@ -279,6 +481,11 @@
         case 'a':
           player.manner('walking_left')
           player.loadSprite('walk_left')
+          break
+        
+        case 'w':
+          player.keys.w.pressed = true
+          player.pressedUpOrDown({verticalOffsetSpeed: 20}) 
           break
       }
     })

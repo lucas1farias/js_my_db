@@ -1,0 +1,738 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de colisão: fundo e lateral</title>
+</head>
+<body>
+  <canvas></canvas>
+  <script>
+
+    document.body.style.backgroundColor = 'black'
+    document.body.style.display = 'flex'
+    document.body.style.display = 'flex'
+    document.body.style.alignItems = 'center'
+    document.body.style.justifyContent = 'center'
+    document.body.style.minHeight = '100vh'
+
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas.getContext('2d')
+
+    canvas.width = 1200
+    canvas.height = 600
+    
+    // Função auxiliar que ajuda a criar lacunas entre objetos no Canvas
+    function range(min, max, float = false) {
+        if (float) {
+          return Math.random() * (max - min + 1) + min
+        }
+        return Math.floor(Math.random() * (max - min + 1) + min)
+    }
+
+    function createPlayer() {
+      player = new Player()
+    }
+    
+    function landscapeConfig({contentBox, imgRef, h, v}) {
+      let theImage = new Image()
+      theImage.src = imgRef
+
+      let newLandscape = new Landscape(
+        {
+          image: theImage,
+          x: h,
+          y: v,
+          width: theImage.width,
+          height: theImage.height
+        }
+      )
+      contentBox.push(newLandscape)
+    }
+    
+    function canvasAdd({content, contentBox, clock}) {
+      if(content === 'landscape') {
+        contentBox.forEach(landscape => {
+          landscape.draw()
+        })
+      }
+      
+      if (content === 'terrain') {
+        contentBox.forEach(terrain => {
+          terrain.draw()
+        })
+      }
+
+      // a_e
+      if (content === 'shell') {
+        
+        contentBox.forEach((shell, i) => {
+          let timeToMove = clock.counter % clock.modular === 0
+          shell.draw()
+          shell.frameAdmin()
+          shell.horizontalOffset()
+          shell.verticalOffset()
+          
+          if (timeToMove) {
+            shell.move()
+            shell.keepOnScreen()
+            clock.counter = 0
+          }
+        })
+      }
+    }
+    
+    function interaction({reference, against}) {
+      if (against === 'landscape') {
+        reference.scenarioMotion({obstacle: landscapes, offset: 5})
+      }
+      
+      else if (against === 'terrain') {
+        reference.scenarioMotion({obstacle: terrains, offset: 5})
+        reference.collisionBottom({obstacle: terrains})
+        reference.collisionHorizontal({obstacle: terrains, reboundBy: 5})
+      }
+      
+      // a_f: Configurar p/ que os cascos possam interagir com o jogador 
+      else if (against === 'shell') {
+        reference.scenarioMotion({obstacle: shells, offset: 5})
+        reference.collisionBottom({obstacle: shells})
+        reference.collisionHorizontal({obstacle: shells, reboundBy: 5})
+      }
+    }
+    
+    function terrainConfig({contentBox, reference, imgRef, amount}) {
+      let whereY = 540
+      
+      let terrain = new Image()
+      terrain.src = imgRef
+
+      let firstFloor = new Thing(
+        {
+          image: terrain, 
+          x: 0, 
+          y: whereY, 
+          width: terrain.width, 
+          height: terrain.height
+        }
+      )
+      contentBox.push(firstFloor)
+      
+      for (let i = 1; i <= amount; i++) {
+        let imageRightEdge = terrain.width
+        let gapMin = 90
+        let gapMax = 120
+
+        let terrainType = ['shorter', 'bigger']
+        let index = Math.floor(Math.random() * terrainType.length)
+        let choice = terrainType[index]
+
+        let newVerticalPosition = range(500, 570)
+        
+        let verticalGrowth = range(0, 200)
+        let horizontalGrowth = range(20, 50)
+        let horizontalShrink = range(70, 120)
+        
+        if (choice == 'shorter') {
+          let newFloor = new Thing(
+          {
+            image: terrain, 
+            x: contentBox[i - 1].x + range(imageRightEdge + gapMin, imageRightEdge + gapMax, true),
+            y: newVerticalPosition, 
+            width: terrain.width - horizontalShrink,
+            height: terrain.height + verticalGrowth
+          })
+          contentBox.push(newFloor)
+        } 
+        
+        else {
+          let newFloor = new Thing(
+          {
+            image: terrain, 
+            x: contentBox[i - 1].x + range(imageRightEdge + gapMin, imageRightEdge + gapMax, true),
+            y: newVerticalPosition, 
+            width: terrain.width + horizontalGrowth, 
+            height: terrain.height + verticalGrowth
+          })
+          contentBox.push(newFloor)
+        }
+      }
+    }
+    
+    // a_d: Função que cria os inimigos
+    function shellConfig({contentBox, amount}) {
+
+      // Primeiro inimigo (posição matriz p/ o resto dos inimigos)
+      contentBox.push(new Shell({first: true}))
+
+      /*
+      Inimigos restantes
+      Cada inimigo criado pega o "x" do anterior como referência + uma distância (p/ não nascerem grudados)
+      */
+      for (let i = 1; i < amount; i++) {
+        let distance = range(200, 270)
+        contentBox.push(new Shell({first: false, x: contentBox[i - 1].x + distance}))
+      }
+    }
+
+    function init() {
+      landscapeConfig({contentBox: landscapes, imgRef: mainbackground, h: 0, v: 0}) 
+      landscapeConfig({contentBox: landscapes, imgRef: hills, h: 0, v: 0})  
+      terrainConfig({contentBox: terrains, imgRef: terrain, amount: 50})
+      shellConfig({contentBox: shells, amount: 500}) // a_d
+      createPlayer()
+    }
+
+    function animate() {
+      ctx.fillStyle = '#222'
+      ctx.fillRect(0, 0, innerWidth, innerHeight)
+
+      shellClock.counter++ // a_b
+      
+      // A ordem dos objetos é importante, quem vier antes, pode ficar por detrás do depois
+      canvasAdd({content: 'landscape', contentBox: landscapes})
+      canvasAdd({content: 'shell', contentBox: shells, clock: shellClock}) // a_e
+      canvasAdd({content: 'terrain', contentBox: terrains}) 
+      
+      player.draw()
+      player.frameAdmin()
+      
+      player.horizontalOffset()
+      player.pressedRightOrLeft({horizontalOffsetSpeed: 5}) 
+
+      player.verticalOffset()           
+      player.fall({jumpOffsetSpeed: 1, obstacle: terrains})
+
+      interaction({reference: player, against: 'landscape'}) 
+      interaction({reference: player, against: 'terrain'})
+      interaction({reference: player, against: 'shell'}) // a_f
+
+      requestAnimationFrame(animate)
+    }
+
+    class Player {
+      constructor() {
+        this.wolfSetup = {
+          
+          idleRight: {
+            widthList: [0, 178, 353, 526, 693, 864, 1039], 
+            widthList2: [178, 176, 173, 167, 170, 172, 176],
+            srcHeight: 167,
+            frameAmount: 6
+          },
+          
+          idleLeft: {
+            widthList: [0, 178, 353, 526, 693, 864, 1039], 
+            widthList2: [178, 176, 173, 167, 170, 172, 176],
+            srcHeight: 167,
+            frameAmount: 6
+          },
+          
+          walkRight: {
+            widthList: [0, 178, 356, 530, 710, 893, 1080, 1260, 1440], 
+            widthList2: [178, 178, 176, 178, 182, 182, 180, 180, 180],
+            srcHeight: 167,
+            frameAmount: 8
+          },
+          
+          walkLeft: {
+            widthList: [1440, 1265, 1087, 907, 722, 540, 360, 178, 0], 
+            widthList2: [180, 176, 176, 182, 182, 182, 180, 180, 180],
+            srcHeight: 167,
+            frameAmount: 8
+          }
+        }
+        
+        this.reference = new Image()
+        this.reference.src = 'img/player/wolf_idle_right.gif'
+        
+        this.surfaceHeight = 61
+        this.playerHeight = 60 
+        
+        this.image = this.reference                                                      
+        this.widthList = this.wolfSetup.idleRight.widthList                      
+        this.frameCounter = 0                                                  
+        this.fixedHeight = 0                                                   
+        this.widthList2 = this.wolfSetup.idleRight.widthList2                  
+        this.srcHeight = this.wolfSetup.idleRight.srcHeight                    
+        this.whereX = 100                                                       
+        this.whereY = -100  
+        this.canvasWidth = 60                                                  
+        this.canvasHeight = 60                                                 
+        
+        this.modularCounter = 0                                                
+        this.modular = 5                                                        
+        this.frameAmount = this.wolfSetup.idleRight.frameAmount
+        
+        this.keys = {
+          d: { pressed: false },
+          a: { pressed: false },
+          w: { pressed: false }
+        }
+
+        this.speed = {x: 0, y: 0}
+        
+        this.motionTrigger = false  
+      }
+
+      draw() {
+        ctx.drawImage(
+          this.image,
+          this.widthList[this.frameCounter],
+          this.fixedHeight,
+          this.widthList2[this.frameCounter],
+          this.srcHeight,
+          this.whereX,
+          this.whereY,
+          this.canvasWidth,
+          this.canvasHeight
+        )
+      }
+
+      timeToLoadNextImage() {
+        return this.modularCounter % this.modular === 0
+      }
+
+      isInsideThreshold() {
+        return this.frameCounter < this.frameAmount
+      }
+
+      keepChangingSprites() {
+        this.frameCounter++
+      }
+
+      resetSpritesCountage() {
+        this.frameCounter = 0
+      }
+
+      frameCounterReachesThreshold(maxValue) {
+        return this.modularCounter == maxValue
+      }
+
+      resetFrameCounter() {
+        this.modularCounter = 0
+      }
+
+      frameAdmin() {
+        this.modularCounter++
+
+        if (this.timeToLoadNextImage()) {
+          if (this.isInsideThreshold()) {
+            this.keepChangingSprites()
+          } else {
+            this.resetSpritesCountage()
+          }
+        }
+        
+        if (this.frameCounterReachesThreshold(25)) {
+          this.resetFrameCounter()
+        }
+      }
+
+      horizontalOffset() {
+        this.whereX += this.speed.x
+      }
+      
+      pressedRightOrLeft({horizontalOffsetSpeed}) {
+        const goLeft = -horizontalOffsetSpeed
+        const goRight = horizontalOffsetSpeed
+        const goIdle = 0
+
+        let rightBoundary = canvas.width / 1.7 
+        let leftBoundary = canvas.width / 4    
+        let playerCanGoRight = this.whereX < rightBoundary
+        let playerCanGoLeft = this.whereX > leftBoundary
+        let playerMovesLeft = this.keys.a.pressed
+        let playerMovesRight = this.keys.d.pressed
+        
+        if (playerMovesLeft && playerCanGoLeft) {
+          this.motionTrigger = false
+          this.speed.x = goLeft
+          
+        } else if (playerMovesRight && playerCanGoRight) {
+          this.motionTrigger = false
+          this.speed.x = goRight
+          
+        } else {
+          this.motionTrigger = true
+          this.speed.x = goIdle
+          
+        }
+      }
+
+      verticalOffset() {
+        this.whereY += this.speed.y
+      }
+
+      pressedUpOrDown({verticalOffsetSpeed}) {
+        const goUp = -verticalOffsetSpeed
+        
+        if (this.keys.w.pressed) {
+          this.speed.y = goUp
+        } else {
+          this.speed.y = 0
+        }
+      }
+
+      fall({jumpOffsetSpeed, obstacle}) {
+        const goUp = jumpOffsetSpeed
+        this.speed.y += goUp
+      }
+
+      loadSprite(action) {
+        if (action === 'idle_right') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_idle_right.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.idleRight.widthList
+          this.widthList2 = this.wolfSetup.idleRight.widthList2
+          this.srcHeight = this.wolfSetup.idleRight.srcHeight
+          this.frameAmount = this.wolfSetup.idleRight.frameAmount
+        } 
+        
+        else if (action === 'idle_left') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_idle_left.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.idleLeft.widthList
+          this.widthList2 = this.wolfSetup.idleLeft.widthList2
+          this.srcHeight = this.wolfSetup.idleLeft.srcHeight
+          this.frameAmount = this.wolfSetup.idleLeft.frameAmount
+        } 
+        
+        else if (action === 'walk_right') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_walk_right.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.walkRight.widthList
+          this.widthList2 = this.wolfSetup.walkRight.widthList2
+          this.srcHeight = this.wolfSetup.walkRight.srcHeight
+          this.frameAmount = this.wolfSetup.walkRight.frameAmount
+        } 
+        
+        else if (action === 'walk_left') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_walk_left.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.walkLeft.widthList
+          this.widthList2 = this.wolfSetup.walkLeft.widthList2
+          this.srcHeight = this.wolfSetup.walkLeft.srcHeight
+          this.frameAmount = this.wolfSetup.walkLeft.frameAmount
+        } 
+      }
+
+      manner(state) {
+        if (state == 'idle_facing_right') {
+          this.keys.d.pressed = false
+          return this.keys.d.pressed
+        }
+        
+        else if (state == 'idle_facing_left') {
+          this.keys.a.pressed = false
+          return this.keys.a.pressed
+        }
+        
+        else if (state == 'walking_right') {
+          this.keys.d.pressed = true
+          return this.keys.d.pressed
+        }
+        
+        else if (state == 'walking_left') {
+          this.keys.a.pressed = true
+          return this.keys.a.pressed
+        }
+      }
+    
+      scenarioMotion({obstacle, offset}) {
+        if (this.motionTrigger && this.keys.d.pressed) {
+          obstacle.forEach(index => {
+            index.x -= offset
+          })
+        } 
+        else if (this.motionTrigger && this.keys.a.pressed) {
+          obstacle.forEach(index => {
+            index.x += offset
+          })
+        }}
+    
+      collisionBottom({obstacle}) {
+        obstacle.forEach(index => {
+          if (
+            this.whereY + this.canvasHeight <= index.y &&
+            this.whereY + this.canvasHeight + this.speed.y >= index.y &&
+            this.whereX + this.canvasWidth >= index.x &&
+            this.whereX <= index.x + index.width
+          ) {
+              this.speed.y = 0
+            }
+          })
+      }
+
+      collisionHorizontal({obstacle, reboundBy}) {
+        obstacle.forEach(index => {
+          if (
+            this.whereX + this.canvasWidth >= index.x &&
+            this.whereX <= index.x + index.width &&
+            this.whereY + this.canvasHeight >= index.y &&
+            this.whereY <= index.y + index.height
+          ) {
+            
+            if (this.keys.d.pressed) {
+              this.speed.x = -reboundBy
+            } else if (this.keys.a.pressed) {
+              this.speed.x = reboundBy
+            }
+          }
+        })
+      }
+    }
+
+    class Landscape {
+      constructor({image, x, y, width, height}) {
+        this.image = image
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+      }
+
+      draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)  
+      }
+    } 
+    
+    class Thing {
+      constructor({ image, x, y, width, height }) {
+        this.image = image
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+      }
+    
+      draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+      }
+    }
+
+    // a_a: Criação do primeiro inimigo: Cascos
+    class Shell {
+      constructor({first, x}) {
+        // Atrib. criado p/ que o inimigo 1 tenha posição fixa, e os próximos usem ele como referência (se "true")
+        this.first = first
+        
+        // Todos os inimigos que estarão no canvas
+        let koopaBlue = new Image()
+        let koopaColorful = new Image()
+        let koopaCyan = new Image()
+        let koopaGolden = new Image()
+        let koopaOrange = new Image()
+        let koopaRed = new Image()
+        let koopaViolet = new Image()
+        let koopaWhiteYellow = new Image()
+        
+        // Localização de todos os arquivos de imagem dos inimigos
+        let prefix = 'img/shells/'
+        koopaBlue.src = `${prefix}shell_blue_tr.gif`
+        koopaColorful.src = `${prefix}shell_colorful_tr.gif`
+        koopaCyan.src = `${prefix}shell_cyan_tr.gif`
+        koopaGolden.src = `${prefix}shell_golden_tr.gif`
+        koopaOrange.src = `${prefix}shell_orange_tr.gif`
+        koopaRed.src = `${prefix}shell_red_tr.gif`
+        koopaViolet.src = `${prefix}shell_violet_tr.gif`
+        koopaWhiteYellow.src = `${prefix}shell_white_yellow_tr.gif`
+        
+        // Os inimigos são colocados num array, p/ serem criados aleatoriamente em "enemySetup"
+        this.enemies = [
+          koopaBlue, koopaColorful, koopaCyan, koopaGolden, koopaOrange, koopaRed, koopaViolet, koopaWhiteYellow
+        ]
+        
+        /*
+          Todos os atributos na ordem exata para criar um inimigo em "draw" (todos têm "w" e "h" iguais)
+          As variáveis "this.widthList" e "this.widthList2" são do mesmo tipo da classe "Player"
+          Isso é devido os inimigos, assim como o jogador, serem animados, precisando ser configurados
+        */
+        let index = range(0, this.enemies.length - 1)
+        this.image = this.enemies[index]
+        this.widthList = [0, 17.5, 34.5, 51.5]
+        this.frameCounter = 0
+        this.fixedHeight = 0
+        this.widthList2 = [16, 17.5, 17, 17]
+        this.srcHeight = 16
+        
+        /*
+          Se "true", o primeiro inimigo ganha uma posição x aleatória
+          Os inimigos seguintes pegam este valor como referência + uma distância 
+          O intuito é criar inimigos espaçados entre si usando como base suas posições "x"
+          Portanto, é uma reação em cadeia, o inimigo 2 pega do 1, o 3 do 2, ou seja: (1 <- 2 <- 3 <- 4 ...)
+        */
+        if(this.first) {
+          const randomXLocation = range(700, 1000)
+          this.x = randomXLocation
+        } 
+        // Se "false", o que for passado no parâmetro, será a posição "x" do inimigo
+        else {
+          this.x = x
+        }
+
+        // Atributos do inimigo já definidos
+        this.y = 535
+        this.width = 32
+        this.height = 32
+        this.modularCounter = 0
+        this.modular = 10
+        this.frameAmount = 3
+        
+        // Controlador do x e y do inimigo
+        this.speed = {x: 0, y: 0}
+      }
+      
+      // Desenho do inimigo no canvas
+      draw() {
+        ctx.drawImage(
+          this.image,
+          this.widthList[this.frameCounter],
+          this.fixedHeight,
+          this.widthList2[this.frameCounter],
+          this.srcHeight,
+          this.x,
+          this.y,
+          this.width,
+          this.height
+        )
+      }
+      
+      // Transição de sprites de cada inimigo
+      frameAdmin() {
+        this.modularCounter++
+
+        if (this.modularCounter % this.modular === 0) {
+          if (this.frameCounter < this.frameAmount) {
+            this.frameCounter++
+          } else {
+            this.frameCounter = 0
+          }
+        }
+      }
+
+      // Alteração de x do inimigo
+      horizontalOffset() {
+        this.x += this.speed.x
+      }
+
+      // Alteração de y do inimigo
+      verticalOffset() {
+        this.y += this.speed.y
+      }
+
+      // Movimentar o inimigo pelo canvas (horizontal & vertical)
+      move() {
+        let directions = ['v', 'h']
+        let chosenDirection = directions[range(0, directions.length - 1)]
+        let left = -2
+        let right = 2
+        let up = -2
+        let down = 2
+
+        if(chosenDirection === 'h') {
+          this.speed.x = range(left, right, true)
+        }
+
+        if(chosenDirection === 'v') {
+          this.speed.y = range(up, down, true)
+        }
+      }
+      
+      // Manter o inimigo em dimensões controladas do canvas
+      keepOnScreen() {
+        const bottomThreshold = canvas.height / 1.2
+        const roof = canvas.height / 2
+        const goUp = -1
+        const goDown = 1
+        
+        let bottomThresholdReached = this.y >= bottomThreshold
+        let roofThresholdReached = this.y <= roof
+        
+        // Impedir sumir do canvas p/ baixo jogando pra cima (valor pequeno torna movimento + natural)
+        if (bottomThresholdReached) {
+          this.speed.y = goUp
+        }
+        // Impedir sumir do canvas p/ cima jogando pra baixo (valor pequeno torna movimento + natural)
+        else if (roofThresholdReached) {
+          this.speed.y = goDown
+        } 
+      }
+    }
+    
+    /*
+      a_b
+      Não é mandatório criar uma classe, mas foi preferido assim
+      Esse objeto de relógio serve p/ controlar o tempo que leva p/ os cascos se deslocarem
+      Isso acontece em "casvasAdd", e é aplicada nas funções "move" e "keepOnScreen"
+    */
+    class Clock {
+      constructor({counter, modular}) {
+        this.counter = counter
+        this.modular = modular
+      }
+    }
+
+    let player = undefined
+    let landscapes = []
+    let terrains = [] 
+    let shells = [] // a_c
+    
+    const mainbackground = 'img/background/background.png'
+    const hills = 'img/background/hills.png'
+    const terrain = 'img/terrain/mario_world_terrain.png'
+
+    let shellClock = new Clock({counter: 0, modular: 70}) // a_b
+    
+    init()
+    animate()
+    
+    addEventListener('keyup', ({ key }) => {
+    switch (key) {
+      
+      case 'd':
+        player.manner('idle_facing_right')
+        player.loadSprite('idle_right')
+        break
+      
+      case 'a':
+        player.manner('idle_facing_left')
+        player.loadSprite('idle_left')
+        break
+      
+      case 'w':
+        player.keys.w.pressed = false
+        break
+      }
+    })
+
+    addEventListener('keydown', ({ key }) => {
+      switch (key) {
+
+        case 'd':
+          player.manner('walking_right')
+          player.loadSprite('walk_right')
+          break
+
+        case 'a':
+          player.manner('walking_left')
+          player.loadSprite('walk_left')
+          break
+        
+        case 'w':
+          player.keys.w.pressed = true
+          player.pressedUpOrDown({verticalOffsetSpeed: 20}) 
+          break
+      }
+    })
+  
+  </script>
+</body>
+</html>

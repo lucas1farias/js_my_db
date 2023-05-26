@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deslocamento em X</title>
+  <title>Delimitar espaço X do jogador</title>
 </head>
 <body>
   <canvas></canvas>
@@ -40,8 +40,11 @@
       player.draw()
       player.frameAdmin()
       
-      player.horizontalOffset() // a_b
-      player.pressedRightOrLeft({horizontalOffsetSpeed: 3.3}) // a_c
+      player.horizontalOffset()
+      player.pressedRightOrLeft({horizontalOffsetSpeed: 3.3}) 
+
+      player.verticalOffset()           
+      player.fall({jumpOffsetSpeed: 1})
       
       requestAnimationFrame(animate)
     }
@@ -91,7 +94,7 @@
         this.fixedHeight = 0                                                   
         this.widthList2 = this.wolfSetup.idleRight.widthList2                  
         this.srcHeight = this.wolfSetup.idleRight.srcHeight                    
-        this.whereX = 100                                                      
+        this.whereX = 100                                                       
         this.whereY = canvas.height - (this.playerHeight + this.surfaceHeight) 
         this.canvasWidth = 60                                                  
         this.canvasHeight = 60                                                 
@@ -102,10 +105,10 @@
         
         this.keys = {
           d: { pressed: false },
-          a: { pressed: false }
+          a: { pressed: false },
+          w: { pressed: false }
         }
 
-        // a_a: Objeto JS que controlará a posição "x" e "y" do jogador
         this.speed = {x: 0, y: 0}
       }
 
@@ -163,23 +166,67 @@
         }
       }
 
-      // a_b: Função que altera a posição "x" do jogador
       horizontalOffset() {
         this.whereX += this.speed.x
       }
       
-      // a_c: Função que add velocidade (conversa diretamente com horizontalOffset)
       pressedRightOrLeft({horizontalOffsetSpeed}) {
         const goLeft = -horizontalOffsetSpeed
         const goRight = horizontalOffsetSpeed
         const goIdle = 0
-        
+
+        /*
+        ========== VERSÃO ANTERIOR DA FUNÇÃO (antes da parte 7) ==========
         if (this.keys.a.pressed) {
-          this.speed.x = goLeft // ir <-
+          this.speed.x = goLeft 
         } else if (this.keys.d.pressed) {
-          this.speed.x = goRight // ir ->
+          this.speed.x = goRight
         } else {
-          this.speed.x = goIdle // parar
+          this.speed.x = goIdle
+        }
+        */
+
+        // a_a: Os delimitadores por onde o jogador deve percorrer no eixo são add nesta função 
+        let rightBoundary = canvas.width / 1.7 // Quanto maior o dividendo, maior a limitação
+        let leftBoundary = canvas.width / 4    // Quanto menor o dividendo, maior a limitação
+        let playerCanGoRight = this.whereX < rightBoundary
+        let playerCanGoLeft = this.whereX > leftBoundary
+        let playerMovesLeft = this.keys.a.pressed
+        let playerMovesRight = this.keys.d.pressed
+        
+        // && são add p/ criar a limitação
+        if (playerMovesLeft && playerCanGoLeft) {
+          this.speed.x = goLeft 
+        } else if (playerMovesRight && playerCanGoRight) {
+          this.speed.x = goRight
+        } else {
+          this.speed.x = goIdle
+        }
+      }
+
+      verticalOffset() {
+        this.whereY += this.speed.y
+      }
+
+      pressedUpOrDown({verticalOffsetSpeed}) {
+        const goUp = -verticalOffsetSpeed
+        
+        if (this.keys.w.pressed) {
+          this.speed.y = goUp
+        } else {
+          this.speed.y = 0
+        }
+      }
+
+      fall({jumpOffsetSpeed}) {
+        const goUp = jumpOffsetSpeed
+        const idle = 0
+        
+        if (this.whereY + this.playerHeight + this.surfaceHeight + this.speed.y <= canvas.height) {
+          this.speed.y += goUp
+        } 
+        else {
+          this.speed.y = idle
         }
       }
 
@@ -247,7 +294,7 @@
         }
       }
     }
-
+    
     let player = undefined
     
     init()
@@ -265,6 +312,10 @@
         player.manner('idle_facing_left')
         player.loadSprite('idle_left')
         break
+      
+      case 'w':
+        player.keys.w.pressed = false
+        break
       }
     })
 
@@ -279,6 +330,11 @@
         case 'a':
           player.manner('walking_left')
           player.loadSprite('walk_left')
+          break
+        
+        case 'w':
+          player.keys.w.pressed = true
+          player.pressedUpOrDown({verticalOffsetSpeed: 20}) 
           break
       }
     })

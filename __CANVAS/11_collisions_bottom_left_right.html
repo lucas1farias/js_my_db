@@ -1,0 +1,587 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de colisão: fundo e lateral</title>
+</head>
+<body>
+  <canvas></canvas>
+  <script>
+
+    document.body.style.backgroundColor = 'black'
+    document.body.style.display = 'flex'
+    document.body.style.display = 'flex'
+    document.body.style.alignItems = 'center'
+    document.body.style.justifyContent = 'center'
+    document.body.style.minHeight = '100vh'
+
+    const canvas = document.querySelector('canvas')
+    const ctx = canvas.getContext('2d')
+
+    canvas.width = 1200
+    canvas.height = 600
+    
+    // Função auxiliar que ajuda a criar lacunas entre objetos no Canvas
+    function range(min, max, float = false) {
+        if (float) {
+          return Math.random() * (max - min + 1) + min
+        }
+        return Math.floor(Math.random() * (max - min + 1) + min)
+    }
+
+    function createPlayer() {
+      player = new Player()
+    }
+    
+    function terrainConfig({contentBox, reference, imgRef, amount}) {
+      let whereY = 540
+      
+      let terrain = new Image()
+      terrain.src = imgRef
+
+      let firstFloor = new Thing(
+        {
+          image: terrain, 
+          x: 0, 
+          y: whereY, 
+          width: terrain.width, 
+          height: terrain.height
+        }
+      )
+      contentBox.push(firstFloor)
+      
+      for (let i = 1; i <= amount; i++) {
+        let imageRightEdge = terrain.width
+        
+        // As lacunas foram alteradas, pois os terrenos não terão + tamanhos todos similares (partes anteriores)
+        let gapMin = 90
+        let gapMax = 120
+
+        // Configuração p/ criar terrenos diversos: 'bigger = + largura' ... 'shorter = - largura'
+        let terrainType = ['shorter', 'bigger']
+        let index = Math.floor(Math.random() * terrainType.length)
+        let choice = terrainType[index]
+
+        // Posicionamento da imagem em "Y". Quanto menor, mais alto no Canvas, quanto maior, mais fundo no Canvas
+        let newVerticalPosition = range(500, 570)
+        
+        // Tornando o tamanho dos terrenos mais aleatórios (menor/maior em largura) (maior em altura) 
+        let verticalGrowth = range(0, 200)
+        let horizontalGrowth = range(20, 50)
+        let horizontalShrink = range(70, 120)
+        
+        // Por essas 2 condições, um terreno será + estreito ou + largo (sorteio)
+        if (choice == 'shorter') {
+          let newFloor = new Thing(
+          {
+            image: terrain, 
+            x: contentBox[i - 1].x + range(imageRightEdge + gapMin, imageRightEdge + gapMax, true),
+            y: newVerticalPosition, 
+            width: terrain.width - horizontalShrink,
+            height: terrain.height + verticalGrowth
+          })
+          contentBox.push(newFloor)
+        } 
+        
+        else {
+          let newFloor = new Thing(
+          {
+            image: terrain, 
+            x: contentBox[i - 1].x + range(imageRightEdge + gapMin, imageRightEdge + gapMax, true),
+            y: newVerticalPosition, 
+            width: terrain.width + horizontalGrowth, 
+            height: terrain.height + verticalGrowth
+          })
+          contentBox.push(newFloor)
+        }
+      }
+    }
+
+    function landscapeConfig({contentBox, imgRef, h, v}) {
+      let theImage = new Image()
+      theImage.src = imgRef
+
+      let newLandscape = new Landscape(
+        {
+          image: theImage,
+          x: h,
+          y: v,
+          width: theImage.width,
+          height: theImage.height
+        }
+      )
+      contentBox.push(newLandscape)
+    }
+    
+    function canvasAdd({content, contentBox}) {
+      if(content === 'landscape') {
+        contentBox.forEach(landscape => {
+          landscape.draw()
+        })
+      }
+      
+      if (content === 'terrain') {
+        contentBox.forEach(terrain => {
+          terrain.draw()
+        })
+      }
+    }
+    
+    function interaction({reference, against}) {
+      if (against === 'landscape') {
+        reference.scenarioMotion({obstacle: landscapes, offset: 5})
+      }
+      
+      else if (against === 'terrain') {
+        reference.scenarioMotion({obstacle: terrains, offset: 5})
+        reference.collisionBottom({obstacle: terrains}) // a_b
+        reference.collisionHorizontal({obstacle: terrains, reboundBy: 5}) // a_c
+      }
+    }
+
+    function init() {
+      landscapeConfig({contentBox: landscapes, imgRef: mainbackground, h: 0, v: 0}) 
+      landscapeConfig({contentBox: landscapes, imgRef: hills, h: 0, v: 0})  
+      terrainConfig({contentBox: terrains, imgRef: terrain, amount: 50})
+      createPlayer()
+    }
+
+    function animate() {
+      ctx.fillStyle = '#222'
+      ctx.fillRect(0, 0, innerWidth, innerHeight)
+
+      canvasAdd({content: 'landscape', contentBox: landscapes})
+      canvasAdd({content: 'terrain', contentBox: terrains}) 
+      
+      player.draw()
+      player.frameAdmin()
+      
+      player.horizontalOffset()
+      player.pressedRightOrLeft({horizontalOffsetSpeed: 5}) 
+
+      player.verticalOffset()           
+      player.fall({jumpOffsetSpeed: 1, obstacle: terrains})
+
+      interaction({reference: player, against: 'landscape'}) 
+      interaction({reference: player, against: 'terrain'})
+      
+      // a_d: Terreno flutuante (proposital, para testar colisões de fundo e horizontais)
+      terrainSample.forEach(terrain => {
+        terrain.draw()
+      })
+      player.collisionBottom({obstacle: terrainSample}) 
+      player.collisionHorizontal({obstacle: terrainSample, reboundBy: 5})
+      
+      requestAnimationFrame(animate)
+    }
+
+    class Player {
+      constructor() {
+        this.wolfSetup = {
+          
+          idleRight: {
+            widthList: [0, 178, 353, 526, 693, 864, 1039], 
+            widthList2: [178, 176, 173, 167, 170, 172, 176],
+            srcHeight: 167,
+            frameAmount: 6
+          },
+          
+          idleLeft: {
+            widthList: [0, 178, 353, 526, 693, 864, 1039], 
+            widthList2: [178, 176, 173, 167, 170, 172, 176],
+            srcHeight: 167,
+            frameAmount: 6
+          },
+          
+          walkRight: {
+            widthList: [0, 178, 356, 530, 710, 893, 1080, 1260, 1440], 
+            widthList2: [178, 178, 176, 178, 182, 182, 180, 180, 180],
+            srcHeight: 167,
+            frameAmount: 8
+          },
+          
+          walkLeft: {
+            widthList: [1440, 1265, 1087, 907, 722, 540, 360, 178, 0], 
+            widthList2: [180, 176, 176, 182, 182, 182, 180, 180, 180],
+            srcHeight: 167,
+            frameAmount: 8
+          }
+        }
+        
+        this.reference = new Image()
+        this.reference.src = 'img/player/wolf_idle_right.gif'
+        
+        this.surfaceHeight = 61
+        this.playerHeight = 60 
+        
+        this.image = this.reference                                                      
+        this.widthList = this.wolfSetup.idleRight.widthList                      
+        this.frameCounter = 0                                                  
+        this.fixedHeight = 0                                                   
+        this.widthList2 = this.wolfSetup.idleRight.widthList2                  
+        this.srcHeight = this.wolfSetup.idleRight.srcHeight                    
+        this.whereX = 100                                                       
+        this.whereY = -100 // Posição alterada (jogador nascendo no topo da tela) 
+        this.canvasWidth = 60                                                  
+        this.canvasHeight = 60                                                 
+        
+        this.modularCounter = 0                                                
+        this.modular = 5                                                        
+        this.frameAmount = this.wolfSetup.idleRight.frameAmount
+        
+        this.keys = {
+          d: { pressed: false },
+          a: { pressed: false },
+          w: { pressed: false }
+        }
+
+        this.speed = {x: 0, y: 0}
+        
+        this.motionTrigger = false  
+      }
+
+      draw() {
+        ctx.drawImage(
+          this.image,
+          this.widthList[this.frameCounter],
+          this.fixedHeight,
+          this.widthList2[this.frameCounter],
+          this.srcHeight,
+          this.whereX,
+          this.whereY,
+          this.canvasWidth,
+          this.canvasHeight
+        )
+      }
+
+      timeToLoadNextImage() {
+        return this.modularCounter % this.modular === 0
+      }
+
+      isInsideThreshold() {
+        return this.frameCounter < this.frameAmount
+      }
+
+      keepChangingSprites() {
+        this.frameCounter++
+      }
+
+      resetSpritesCountage() {
+        this.frameCounter = 0
+      }
+
+      frameCounterReachesThreshold(maxValue) {
+        return this.modularCounter == maxValue
+      }
+
+      resetFrameCounter() {
+        this.modularCounter = 0
+      }
+
+      frameAdmin() {
+        this.modularCounter++
+
+        if (this.timeToLoadNextImage()) {
+          if (this.isInsideThreshold()) {
+            this.keepChangingSprites()
+          } else {
+            this.resetSpritesCountage()
+          }
+        }
+        
+        if (this.frameCounterReachesThreshold(25)) {
+          this.resetFrameCounter()
+        }
+      }
+
+      horizontalOffset() {
+        this.whereX += this.speed.x
+      }
+      
+      pressedRightOrLeft({horizontalOffsetSpeed}) {
+        const goLeft = -horizontalOffsetSpeed
+        const goRight = horizontalOffsetSpeed
+        const goIdle = 0
+
+        let rightBoundary = canvas.width / 1.7 
+        let leftBoundary = canvas.width / 4    
+        let playerCanGoRight = this.whereX < rightBoundary
+        let playerCanGoLeft = this.whereX > leftBoundary
+        let playerMovesLeft = this.keys.a.pressed
+        let playerMovesRight = this.keys.d.pressed
+        
+        if (playerMovesLeft && playerCanGoLeft) {
+          this.motionTrigger = false
+          this.speed.x = goLeft
+          
+        } else if (playerMovesRight && playerCanGoRight) {
+          this.motionTrigger = false
+          this.speed.x = goRight
+          
+        } else {
+          this.motionTrigger = true
+          this.speed.x = goIdle
+          
+        }
+      }
+
+      verticalOffset() {
+        this.whereY += this.speed.y
+      }
+
+      pressedUpOrDown({verticalOffsetSpeed}) {
+        const goUp = -verticalOffsetSpeed
+        
+        if (this.keys.w.pressed) {
+          this.speed.y = goUp
+        } else {
+          this.speed.y = 0
+        }
+      }
+
+      fall({jumpOffsetSpeed, obstacle}) {
+        const goUp = jumpOffsetSpeed
+
+        /*
+          a_a
+          No tutorial "5_move_vertically_animated_player.html", temos "this.speed.y = idle"
+          Configuração anterior: o jogador sofre o efeito da gravidade (queda = +y) em "if"
+          Ou seja, sua posição "y" continua decremetando constantemente até "if" não + satisfazer
+          Quando "else" é alcançado, sua posição "y" é zerada (jogador para de cair)
+          
+          ========== PROBLEMA ========== 
+          Agora é preciso que as colisões de FUNDO e LATERAIS, funcionem (inexistentes na parte 5)
+          É desejado que o jogador caia ao chegar no limite lateral dos objetos à <- e -> em contato com ele
+          É desejado que o jogador pouse nos objetos que estão equivalentes a sua posição "y" (do seu fundo)
+          Isso não acontece, pois antes (na parte 5), foi feita uma configuração
+          
+          ========== ANTES (parte 5) ==========
+          A função "fall", até este momento, está fazendo o jogador cair infinitamente
+          Quando a posição "y" do fundo o jogador alcança a posição "y" do topo da superfície inicial, ele para de cair
+          "this.speed.y = idle" foi a solução encontrada p/ o jogador não cair infinitamente e sumir da tela
+          Ele tinha que pousar em algo p/ se manter na tela, pois não há funções que tratem colisão (até agora)
+          
+          ========== AGORA (parte 11) ==========
+          Agora há 2 funções p/ criar colisão (collisionBottom, collisionHorizontal)
+          Sendo assim, o problema na parte 5 é resolvido, pois agora as colisões são aplicadas em todos os objetos
+          Agora é possível retirar o "if" e deixar a ação antes dentro dele, sozinha na função
+          */
+        
+        this.speed.y += goUp
+      }
+
+      loadSprite(action) {
+        if (action === 'idle_right') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_idle_right.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.idleRight.widthList
+          this.widthList2 = this.wolfSetup.idleRight.widthList2
+          this.srcHeight = this.wolfSetup.idleRight.srcHeight
+          this.frameAmount = this.wolfSetup.idleRight.frameAmount
+        } 
+        
+        else if (action === 'idle_left') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_idle_left.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.idleLeft.widthList
+          this.widthList2 = this.wolfSetup.idleLeft.widthList2
+          this.srcHeight = this.wolfSetup.idleLeft.srcHeight
+          this.frameAmount = this.wolfSetup.idleLeft.frameAmount
+        } 
+        
+        else if (action === 'walk_right') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_walk_right.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.walkRight.widthList
+          this.widthList2 = this.wolfSetup.walkRight.widthList2
+          this.srcHeight = this.wolfSetup.walkRight.srcHeight
+          this.frameAmount = this.wolfSetup.walkRight.frameAmount
+        } 
+        
+        else if (action === 'walk_left') {
+          this.reference = new Image()
+          this.reference.src = 'img/player/wolf_walk_left.gif'
+          this.image = this.reference
+          this.widthList = this.wolfSetup.walkLeft.widthList
+          this.widthList2 = this.wolfSetup.walkLeft.widthList2
+          this.srcHeight = this.wolfSetup.walkLeft.srcHeight
+          this.frameAmount = this.wolfSetup.walkLeft.frameAmount
+        } 
+      }
+
+      manner(state) {
+        if (state == 'idle_facing_right') {
+          this.keys.d.pressed = false
+          return this.keys.d.pressed
+        }
+        
+        else if (state == 'idle_facing_left') {
+          this.keys.a.pressed = false
+          return this.keys.a.pressed
+        }
+        
+        else if (state == 'walking_right') {
+          this.keys.d.pressed = true
+          return this.keys.d.pressed
+        }
+        
+        else if (state == 'walking_left') {
+          this.keys.a.pressed = true
+          return this.keys.a.pressed
+        }
+      }
+    
+      scenarioMotion({obstacle, offset}) {
+        if (this.motionTrigger && this.keys.d.pressed) {
+          obstacle.forEach(index => {
+            index.x -= offset
+          })
+        } 
+        else if (this.motionTrigger && this.keys.a.pressed) {
+          obstacle.forEach(index => {
+            index.x += offset
+          })
+        }}
+    
+    // a_b: Pouso do jogador sob os objetos (cada índice de um array) passados em "obstacle" 
+    collisionBottom({obstacle}) {
+      obstacle.forEach(index => {
+        if (
+          this.whereY + this.canvasHeight <= index.y &&
+          this.whereY + this.canvasHeight + this.speed.y >= index.y &&
+          this.whereX + this.canvasWidth >= index.x &&
+          this.whereX <= index.x + index.width
+        ) {
+            this.speed.y = 0
+          }
+        })
+    }
+
+    // a_c: Colisão frontal na <- / -> do jogador com os objetos passados em "obstacle"
+    collisionHorizontal({obstacle, reboundBy}) {
+      obstacle.forEach(index => {
+        if (
+          this.whereX + this.canvasWidth >= index.x &&
+          this.whereX <= index.x + index.width &&
+          this.whereY + this.canvasHeight >= index.y &&
+          this.whereY <= index.y + index.height
+        ) {
+          
+          // Impedir o jogador de se mexer anulando seu vetor pro lado oposto que ele está indo
+          if (this.keys.d.pressed) {
+            this.speed.x = -reboundBy
+          } else if (this.keys.a.pressed) {
+            this.speed.x = reboundBy
+          }
+        }
+      })
+    }
+    }
+
+    class Landscape {
+      constructor({image, x, y, width, height}) {
+        this.image = image
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+      }
+
+      draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)  
+      }
+    } 
+    
+    class Thing {
+      constructor({ image, x, y, width, height }) {
+        this.image = image
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+      }
+    
+      draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+      }
+    }
+
+    let player = undefined
+    let landscapes = []
+    let terrains = [] 
+    
+    const mainbackground = 'img/background/background.png'
+    const hills = 'img/background/hills.png'
+    const terrain = 'img/terrain/mario_world_terrain.png'
+
+    // a_d: Demonstração de como as colisões de fundo e laterais funcionam (pular e testar quedas laterais)
+    const terrainTest = new Image()
+    terrainTest.src = 'img/terrain/mario_world_terrain.png'
+    const terrainSample = [
+      new Thing({image: terrainTest, x: 450, y: 400, width: terrainTest.width / 2, height: terrainTest.height / 2})
+    ]
+
+    init()
+    animate()
+
+    terrains.forEach((terrain, i) => {
+      console.log(
+        `
+        Índice: ${i}
+        Altura do canvas em Y: ${canvas.height}
+        Fundo da imagem: ${terrain.y - terrain.height}
+        Altura da imagem: ${terrain.height}
+        Largura da imagem: ${terrain.width}
+        `
+      )
+    })
+    
+    addEventListener('keyup', ({ key }) => {
+    switch (key) {
+      
+      case 'd':
+        player.manner('idle_facing_right')
+        player.loadSprite('idle_right')
+        break
+      
+      case 'a':
+        player.manner('idle_facing_left')
+        player.loadSprite('idle_left')
+        break
+      
+      case 'w':
+        player.keys.w.pressed = false
+        break
+      }
+    })
+
+    addEventListener('keydown', ({ key }) => {
+      switch (key) {
+
+        case 'd':
+          player.manner('walking_right')
+          player.loadSprite('walk_right')
+          break
+
+        case 'a':
+          player.manner('walking_left')
+          player.loadSprite('walk_left')
+          break
+        
+        case 'w':
+          player.keys.w.pressed = true
+          player.pressedUpOrDown({verticalOffsetSpeed: 20}) 
+          break
+      }
+    })
+  
+  </script>
+</body>
+</html>

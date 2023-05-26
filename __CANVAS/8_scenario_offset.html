@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deslocamento em X</title>
+  <title>Movimentar cenário</title>
 </head>
 <body>
   <canvas></canvas>
@@ -29,19 +29,59 @@
       player = new Player()
     }
 
+    function landscapeConfig({contentBox, imgRef, h, v}) {
+      let theImage = new Image()
+      theImage.src = imgRef
+
+      let newLandscape = new Landscape(
+        {
+          image: theImage,
+          x: h,
+          y: v,
+          width: theImage.width,
+          height: theImage.height
+        }
+      )
+      contentBox.push(newLandscape)
+    }
+    
+    function canvasAdd({content, contentBox}) {
+      if(content === 'landscape') {
+        contentBox.forEach(landscape => {
+          landscape.draw()
+        })
+      }
+    }
+    
+    // a_b
+    function interaction({reference, against}) {
+      if (against === 'landscape') {
+        reference.scenarioMotion({obstacle: landscapes, offset: 5}) // a_a
+      }
+    }
+
     function init() {
+      landscapeConfig({contentBox: landscapes, imgRef: mainbackground, h: 0, v: 0}) 
+      landscapeConfig({contentBox: landscapes, imgRef: hills, h: 0, v: 0}) 
       createPlayer()
     }
 
     function animate() {
       ctx.fillStyle = '#222'
       ctx.fillRect(0, 0, innerWidth, innerHeight)
+
+      canvasAdd({content: 'landscape', contentBox: landscapes})
       
       player.draw()
       player.frameAdmin()
       
-      player.horizontalOffset() // a_b
-      player.pressedRightOrLeft({horizontalOffsetSpeed: 3.3}) // a_c
+      player.horizontalOffset()
+      player.pressedRightOrLeft({horizontalOffsetSpeed: 5}) 
+
+      player.verticalOffset()           
+      player.fall({jumpOffsetSpeed: 1})
+
+      interaction({reference: player, against: 'landscape'}) // a_b
       
       requestAnimationFrame(animate)
     }
@@ -91,7 +131,7 @@
         this.fixedHeight = 0                                                   
         this.widthList2 = this.wolfSetup.idleRight.widthList2                  
         this.srcHeight = this.wolfSetup.idleRight.srcHeight                    
-        this.whereX = 100                                                      
+        this.whereX = 100                                                       
         this.whereY = canvas.height - (this.playerHeight + this.surfaceHeight) 
         this.canvasWidth = 60                                                  
         this.canvasHeight = 60                                                 
@@ -102,10 +142,10 @@
         
         this.keys = {
           d: { pressed: false },
-          a: { pressed: false }
+          a: { pressed: false },
+          w: { pressed: false }
         }
 
-        // a_a: Objeto JS que controlará a posição "x" e "y" do jogador
         this.speed = {x: 0, y: 0}
       }
 
@@ -163,23 +203,57 @@
         }
       }
 
-      // a_b: Função que altera a posição "x" do jogador
       horizontalOffset() {
         this.whereX += this.speed.x
       }
       
-      // a_c: Função que add velocidade (conversa diretamente com horizontalOffset)
       pressedRightOrLeft({horizontalOffsetSpeed}) {
         const goLeft = -horizontalOffsetSpeed
         const goRight = horizontalOffsetSpeed
         const goIdle = 0
+
+        let rightBoundary = canvas.width / 1.7 
+        let leftBoundary = canvas.width / 4    
+        let playerCanGoRight = this.whereX < rightBoundary
+        let playerCanGoLeft = this.whereX > leftBoundary
+        let playerMovesLeft = this.keys.a.pressed
+        let playerMovesRight = this.keys.d.pressed
         
-        if (this.keys.a.pressed) {
-          this.speed.x = goLeft // ir <-
-        } else if (this.keys.d.pressed) {
-          this.speed.x = goRight // ir ->
+        if (playerMovesLeft && playerCanGoLeft) {
+          this.speed.x = goLeft
+          
+        } else if (playerMovesRight && playerCanGoRight) {
+          this.speed.x = goRight
+          
         } else {
-          this.speed.x = goIdle // parar
+          this.speed.x = goIdle
+          
+        }
+      }
+
+      verticalOffset() {
+        this.whereY += this.speed.y
+      }
+
+      pressedUpOrDown({verticalOffsetSpeed}) {
+        const goUp = -verticalOffsetSpeed
+        
+        if (this.keys.w.pressed) {
+          this.speed.y = goUp
+        } else {
+          this.speed.y = 0
+        }
+      }
+
+      fall({jumpOffsetSpeed}) {
+        const goUp = jumpOffsetSpeed
+        const idle = 0
+        
+        if (this.whereY + this.playerHeight + this.surfaceHeight + this.speed.y <= canvas.height) {
+          this.speed.y += goUp
+        } 
+        else {
+          this.speed.y = idle
         }
       }
 
@@ -246,9 +320,40 @@
           return this.keys.a.pressed
         }
       }
+    
+      // a_a: Mover os elementos do canvas (cenários + objetos) em seus atributos "x" na direção oposta a do jogador
+      scenarioMotion({obstacle, offset}) {
+        if (this.keys.d.pressed) {
+          obstacle.forEach(index => {
+            index.x -= offset
+          })
+        } 
+        else if (this.keys.a.pressed) {
+          obstacle.forEach(index => {
+            index.x += offset
+          })
+        }}
     }
 
+    class Landscape {
+      constructor({image, x, y, width, height}) {
+        this.image = image
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+      }
+
+      draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)  
+      }
+    } 
+    
     let player = undefined
+    let landscapes = []
+
+    const mainbackground = 'img/background/background.png'
+    const hills = 'img/background/hills.png'
     
     init()
     animate()
@@ -265,6 +370,10 @@
         player.manner('idle_facing_left')
         player.loadSprite('idle_left')
         break
+      
+      case 'w':
+        player.keys.w.pressed = false
+        break
       }
     })
 
@@ -279,6 +388,11 @@
         case 'a':
           player.manner('walking_left')
           player.loadSprite('walk_left')
+          break
+        
+        case 'w':
+          player.keys.w.pressed = true
+          player.pressedUpOrDown({verticalOffsetSpeed: 20}) 
           break
       }
     })

@@ -1,0 +1,13 @@
+
+
+/*
+1. Eu acho que esses dois vídeos desse canal são muito úteis
+2. A pessoa já ensina a testar o código sem ter que abrir input pra digitar
+3. E ao terminar de testar, só copiar o código e jogar pra submissão
+OBS:
+    . Pode ser que seja preciso renomea arquivos "js" para "cjs"
+    . Em "readFileSync", no parâmetro 1, se apenas "stdin" gerar erro, tente passar todo o caminho até chegar em "stdin"
+    . Ex: se "stdin" não estiver na raiz do projeto, mas dentro de uma pasta "beecrowd", então: readFileSync('beecrowd/stdin') 
+https://www.youtube.com/watch?v=1xmkBH4rrUA
+https://www.youtube.com/watch?v=hXVFZlQ0zvI
+*/

@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deslocamento em X</title>
+  <title>Deslocamento em Y</title>
 </head>
 <body>
   <canvas></canvas>
@@ -40,8 +40,11 @@
       player.draw()
       player.frameAdmin()
       
-      player.horizontalOffset() // a_b
-      player.pressedRightOrLeft({horizontalOffsetSpeed: 3.3}) // a_c
+      player.horizontalOffset()
+      player.pressedRightOrLeft({horizontalOffsetSpeed: 3.3}) 
+
+      player.verticalOffset()           // a_c
+      player.fall({jumpOffsetSpeed: 1}) // a_e
       
       requestAnimationFrame(animate)
     }
@@ -91,7 +94,7 @@
         this.fixedHeight = 0                                                   
         this.widthList2 = this.wolfSetup.idleRight.widthList2                  
         this.srcHeight = this.wolfSetup.idleRight.srcHeight                    
-        this.whereX = 100                                                      
+        this.whereX = 100                                                       
         this.whereY = canvas.height - (this.playerHeight + this.surfaceHeight) 
         this.canvasWidth = 60                                                  
         this.canvasHeight = 60                                                 
@@ -102,10 +105,11 @@
         
         this.keys = {
           d: { pressed: false },
-          a: { pressed: false }
+          a: { pressed: false },
+          w: { pressed: false } // a_a: É preciso uma tecla p/ engatilhar o que resultará o salto
         }
 
-        // a_a: Objeto JS que controlará a posição "x" e "y" do jogador
+        // a_b: Objeto JS que controlará a posição "x" e "y" do jogador
         this.speed = {x: 0, y: 0}
       }
 
@@ -163,23 +167,51 @@
         }
       }
 
-      // a_b: Função que altera a posição "x" do jogador
       horizontalOffset() {
         this.whereX += this.speed.x
       }
       
-      // a_c: Função que add velocidade (conversa diretamente com horizontalOffset)
       pressedRightOrLeft({horizontalOffsetSpeed}) {
         const goLeft = -horizontalOffsetSpeed
         const goRight = horizontalOffsetSpeed
         const goIdle = 0
         
         if (this.keys.a.pressed) {
-          this.speed.x = goLeft // ir <-
+          this.speed.x = goLeft 
         } else if (this.keys.d.pressed) {
-          this.speed.x = goRight // ir ->
+          this.speed.x = goRight
         } else {
-          this.speed.x = goIdle // parar
+          this.speed.x = goIdle
+        }
+      }
+
+      // a_c: Função que altera a posição "y" do jogador
+      verticalOffset() {
+        this.whereY += this.speed.y
+      }
+
+      // a_d: Como a posição "y" do jogador é alterada
+      pressedUpOrDown({verticalOffsetSpeed}) {
+        const goUp = -verticalOffsetSpeed
+        
+        if (this.keys.w.pressed) {
+          this.speed.y = goUp // p/ cima
+        } else {
+          this.speed.y = 0
+        }
+      }
+
+      // a_e: Função que serve p/ queda do jogador (parar ++ de this.speed.y imediatamente)
+      fall({jumpOffsetSpeed}) {
+        const goUp = jumpOffsetSpeed
+        const idle = 0
+        
+        if (this.whereY + this.playerHeight + this.surfaceHeight + this.speed.y <= canvas.height) {
+          this.speed.y += goUp
+        } 
+        // Incrementação parada imediatamente
+        else {
+          this.speed.y = idle
         }
       }
 
@@ -265,6 +297,11 @@
         player.manner('idle_facing_left')
         player.loadSprite('idle_left')
         break
+      
+      // a_d
+      case 'w':
+        player.keys.w.pressed = false
+        break
       }
     })
 
@@ -279,6 +316,18 @@
         case 'a':
           player.manner('walking_left')
           player.loadSprite('walk_left')
+          break
+        
+        // a_d
+        case 'w':
+          /*
+            "this.keys.w.pressed" só é ativada aqui por não haver um "Spritesheet" p/ o salto
+            Havendo um, ele segue a mesma ordem que construiu as outras animações (descrito melhor nos exemplos 2 e 3)
+            Os processos:
+                this.wolfSetup -> this.keys -> this.loadSprite -> this.manner -> eventListeners
+          */
+          player.keys.w.pressed = true
+          player.pressedUpOrDown({verticalOffsetSpeed: 20}) 
           break
       }
     })

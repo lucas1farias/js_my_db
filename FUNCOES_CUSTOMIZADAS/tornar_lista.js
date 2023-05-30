@@ -9,19 +9,25 @@ function fatiar(alvo, min, max) {
 }
 
 function tornar_lista(alvo, separador, funcao) {
-  let lista_str = []
+  let array = []
   let a = 0
-  
-  for (let i = 0; i <= alvo.length - 1; i++) {
+  for (let i = 0; i < alvo.length; i++) {
     if (alvo[i] === separador) {
-      lista_str.push(funcao(alvo, a, i - 1))
+      array.push(funcao(alvo, a, i - 1))
       a = i + 1
     }
   }
-
-  return lista_str
+  return array
 }
 
-const alvo = 'Java_script'
-const alvo_lista = tornar_lista(alvo + '_', '_', fatiar)
-console.log(alvo_lista)
+function tornar_lista_generico(alvo) {
+  const array = []
+  for (let i of alvo) {
+    array.push(i)
+  }
+  return array
+}
+
+const string = 'Java_script'
+console.log(tornar_lista(string + '_', '_', fatiar))
+console.log(tornar_lista_generico(string))

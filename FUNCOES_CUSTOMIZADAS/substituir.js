@@ -1,29 +1,18 @@
 
 
-function substituir(alvo, min, max, particula) {
+function substituir_seguidos(alvo, min, max, substituto) {
   let string = ''
-
-  if (min == 0) {
-    min = -1
+  min === 0 ? min = -1 : null
+  for (let i = 0; i < alvo.length; i++) {
+    i <= min ? string += alvo[i] : null
+    i > min && i < max ? string += '' : null
+    i === max ? string += substituto : null
+    i > min && i > max ? string += alvo[i] : null
   }
-  
-  for (let i = 0; i <= alvo.length - 1; i++) {
-    if (i <= min) {
-      string += alvo[i]
-    }
-    if (i >= min && i < max) {
-      string += ''
-    }
-    if (i == max) {
-      string += particula
-    }
-    if (i > min && i > max) {
-      string += alvo[i]
-    }
-  }
-  
   return string
 }
 
 const js = 'Javascript'
-console.log(substituir(js, 0, 3, 'Python'))
+console.log(substituir_seguidos(js, 0, 3, 'Python'))
+console.log(substituir_seguidos(js, 0, 3, ''))
+console.log(substituir_seguidos(js, 2, js.length - 1, '_'))

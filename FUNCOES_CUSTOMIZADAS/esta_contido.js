@@ -21,6 +21,9 @@ function esta_contido(menor, maior) {
   return igual >= menor.length ? true : false
 }
 
+// serve para arrays numéricos
+// só serve para strings se for verificar caracteres fora de sequência
+// ex: "la" está em "lucasf" -> true ("la" em sequência = false)
 function esta_contido(alvo, ref) {
   const array = []
   let c_menor = 0

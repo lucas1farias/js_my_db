@@ -101,9 +101,64 @@ function mediana(colecao, funcao, criterio) {
   return relatorio
 }
 
-// O corno do meu professor de algoritmos deseja que eu faça uma aplicação para praticar (map, filter, reduce)
-// Os itens estão listados abaixo
+function somar(colecao) {
+  let soma_negativos = 0
+  let soma_positivos = 0
+  let soma_todos = 0
+  for (let i = 0; i < tamanho_colecao(colecao); i++) {
+    colecao[i] < 0 ? soma_negativos += colecao[i] : null
+    colecao[i] > 0 ? soma_positivos += colecao[i] : null
+    soma_todos += colecao[i]
+  }
+  return `
+  \n========== SOMA DOS NÚMEROS ==========
+  Vetor:                     ${colecao}
+  Número negativos somados:  ${soma_negativos}
+  Números positivos somados: ${soma_positivos}
+  Todos os números somados:  ${soma_todos}
+  `
+}
 
+function valores_acima_media(vetor) {
+  let soma_cada_indice = 0
+  let acima_da_media = []
+  let indice = 0
+  let relatorio = '========== VALORES ACIMA DA MÉDIA =========='
+  relatorio += `\nVetor: ${vetor}`
+  
+  for (let i = 0; i < tamanho_colecao(vetor); i++) {
+      soma_cada_indice += vetor[i]
+  }
+  
+  const media = soma_cada_indice / tamanho_colecao(vetor)
+  relatorio += `\nMédia: ${media}`
+  
+  for (let i = 0; i < tamanho_colecao(vetor); i++) {
+    if (vetor[i] > media) {
+      acima_da_media[indice] = vetor[i]
+      indice++
+    }
+  }
+  relatorio += `\nValores acima da média: ${acima_da_media}`
+  console.log(relatorio)
+}
+
+// let array_principal = []
+// let array_principal_indice = 0
+// for (let i = 0; i < range_valores; i++) {
+//   array_principal[array_principal_indice] = i
+//   array_principal_indice++
+// }
+// array_principal = embaralhar(array_principal, 0)
+// const resultado = `
+// ========== AGRUPAMENTO DE VETORES ==========
+// Quantidade de grupos: ${qtd_grupos}
+// Divisão dos grupos: ${tamanhos}
+// Números distintos: ${range_valores}`
+// console.log(resultado)
+// console.log(array_principal)
+
+/*
 Faça uma Aplicação com MENU que:
 
 1. Gerar vetor N posições, pedir valor padrão
@@ -154,5 +209,4 @@ Pergunta se: todos, ou apenas pares, ou impares, ou positivos ou negativos, ou a
 Pergunta se: todos, ou apenas pares, ou impares, ou positivos ou negativos, ou ainda apenas os múltiplos (positivos ou negativos) de N
 
 20. Eliminar números múltiplos de N e M (simultaneamente)
-
-// Eu não entendi o item 18, parece muito mal escrito. Poderia me explicar o que ele quer nesse item?
+*/
